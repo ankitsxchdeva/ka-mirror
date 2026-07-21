@@ -8,11 +8,7 @@ import { ClientRouter } from 'astro:transitions';
 import Header from '../components/Header.astro';
 import { withBase } from '../lib/catalog.js';
 
-const {
-  title,
-  description = 'A community archive of artisan keycaps: makers, sculpts, and colorways.',
-  ogImage,
-} = Astro.props;
+const { title, description, ogImage } = Astro.props;
 const fullTitle = title ? `${title} · Keycap Archivist Mirror` : 'Keycap Archivist Mirror';
 ---
 
@@ -21,12 +17,12 @@ const fullTitle = title ? `${title} · Keycap Archivist Mirror` : 'Keycap Archiv
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
-    <meta name="description" content={description} />
+    {description && <meta name="description" content={description} />}
     <meta name="theme-color" content="#1c1e24" />
     <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
     <meta property="og:title" content={fullTitle} />
-    <meta property="og:description" content={description} />
+    {description && <meta property="og:description" content={description} />}
     <meta property="og:type" content="website" />
     <meta property="og:url" content={new URL(Astro.url.pathname, Astro.site)} />
     {ogImage && <meta property="og:image" content={ogImage} />}
