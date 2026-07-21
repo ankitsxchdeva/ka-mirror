@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import { withBase } from '../lib/catalog.js';
+---
+
+<Base title="Not found">
+  <div class="prose nf">
+    <p class="microhead">404 / not in the registry</p>
+    <h1 class="page-title">This cap isn&rsquo;t catalogued here.</h1>
+    <p>
+      The page may have moved when the catalog was resynced.
+      <a href={withBase('/')}>Browse the index</a> or press <kbd>/</kbd> to search.
+    </p>
+  </div>
+</Base>
+
+<style>
+  .nf {
+    padding: 48px 0;
+  }
+  .nf .microhead {
+    margin: 0 0 10px;
+  }
+</style>

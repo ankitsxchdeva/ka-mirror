@@ -1,0 +1,52 @@
+name: Build & deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    # Upstream database sync runs at 00:00 UTC and finishes ~02:15;
+    # rebuild daily at 03:30 UTC with the fresh catalog.
+    - cron: '30 3 * * *'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Fetch latest catalog
+        run: node scripts/fetch-data.mjs --force
+      - name: Build site
+        env:
+          # Custom-domain defaults (public/CNAME); set SITE_URL/BASE_PATH repo
+          # variables to override (e.g. project pages need BASE_PATH=/<repo>).
+          SITE_URL: ${{ vars.SITE_URL || 'https://ka-mirror.com' }}
+          BASE_PATH: ${{ vars.BASE_PATH || '/' }}
+        run: npx astro build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

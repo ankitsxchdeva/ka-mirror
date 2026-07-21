@@ -1,0 +1,379 @@
+---
+import { withBase } from '../lib/catalog.js';
+---
+
+<header>
+  <div class="head-inner">
+    <a class="wordmark" href={withBase('/')}>
+      <span class="mark" aria-hidden="true">KA</span>
+      <span class="name">Keycap Archivist</span>
+      <span class="sub">mirror</span>
+    </a>
+
+    <div class="search" id="ka-search">
+      <input
+        id="ka-search-input"
+        type="search"
+        placeholder="search makers, sculpts, colorways"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Search the archive"
+      />
+      <kbd class="hint" aria-hidden="true">/</kbd>
+      <div class="search-panel" id="ka-search-panel" hidden></div>
+    </div>
+
+    <a
+      class="icon-btn"
+      href="https://github.com/ankitsxchdeva/ka-mirror"
+      title="Site source on GitHub"
+      aria-label="Site source on GitHub"
+      rel="noopener"
+    >
+      <!-- GitHub mark, via Simple Icons -->
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+      </svg>
+    </a>
+
+    <button
+      class="icon-btn"
+      id="theme-toggle"
+      title="Toggle light/dark theme"
+      aria-label="Toggle light/dark theme"
+    >
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+        <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.4" />
+        <path d="M7 1.5 A5.5 5.5 0 0 0 7 12.5 Z" fill="currentColor" />
+      </svg>
+    </button>
+  </div>
+</header>
+
+<style>
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+  }
+  .head-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .wordmark {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .mark {
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 0.75rem;
+    color: var(--bg);
+    background: var(--ink);
+    padding: 2px 5px;
+    letter-spacing: 0.05em;
+  }
+  .name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: -0.01em;
+  }
+  .sub {
+    font-family: var(--mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  .search {
+    position: relative;
+    flex: 1;
+    max-width: 460px;
+    margin-left: auto;
+  }
+  .search input {
+    width: 100%;
+    font-size: 0.8125rem;
+    padding: 6px 34px 6px 10px;
+  }
+  .hint {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    translate: 0 -50%;
+    pointer-events: none;
+  }
+  .search input:focus ~ .hint {
+    display: none;
+  }
+  .search-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    max-height: min(70vh, 540px);
+    overflow-y: auto;
+    background: var(--bg-panel);
+    border: 1px solid var(--line-strong);
+  }
+  .icon-btn {
+    color: var(--ink-dim);
+    padding: 6px;
+    display: grid;
+    place-items: center;
+    transition: color var(--t);
+  }
+  .icon-btn:hover {
+    color: var(--ink);
+  }
+  @media (max-width: 560px) {
+    .head-inner {
+      flex-wrap: wrap;
+      height: auto;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+    .search {
+      order: 3;
+      flex-basis: 100%;
+      max-width: none;
+    }
+    .hint {
+      display: none;
+    }
+  }
+</style>
+
+<style is:global>
+  /* Search result rows are injected by script, so style them globally. */
+  .search-panel .sr-group {
+    font-family: var(--mono);
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    padding: 10px 10px 4px;
+    border-bottom: 1px solid var(--line);
+  }
+  .search-panel .sr-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 10px;
+    font-size: 0.8125rem;
+    border-bottom: 1px solid var(--line);
+    transition: background-color var(--t);
+  }
+  .search-panel .sr-row:last-child {
+    border-bottom: none;
+  }
+  .search-panel .sr-row[data-active],
+  .search-panel .sr-row:hover {
+    background: var(--bg-hover);
+  }
+  .search-panel .sr-context {
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    color: var(--ink-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-shrink: 1;
+  }
+  .search-panel .sr-note {
+    padding: 10px;
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    color: var(--ink-dim);
+  }
+</style>
+
+<script>
+  // ---- theme toggle -------------------------------------------------------
+  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+    const root = document.documentElement;
+    const light = root.dataset.theme !== 'light';
+    if (light) root.dataset.theme = 'light';
+    else delete root.dataset.theme;
+    localStorage.setItem('ka-theme', light ? 'light' : 'dark');
+  });
+
+  // ---- search -------------------------------------------------------------
+  // Two lazily-fetched indexes: a light one (makers + sculpts, fetched on
+  // focus) and the full colorway index (~70k entries, fetched on first
+  // 2+ character query, cached by the browser afterwards).
+  const BASE = import.meta.env.BASE_URL.replace(/\/+$/, '');
+  const input = document.getElementById('ka-search-input') as HTMLInputElement | null;
+  const panel = document.getElementById('ka-search-panel');
+
+  // "/" focuses search from anywhere.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+    const t = e.target as HTMLElement;
+    if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable) return;
+    e.preventDefault();
+    input?.focus();
+    input?.select();
+  });
+
+  interface LightIndex {
+    makers: { n: string; u: string }[];
+    sculpts: { n: string; m: string; u: string }[];
+  }
+  // colorways.json: { sculpts: [name, makerName, url][], colorways: [sculptIdx, name, id][] }
+  interface CwIndex {
+    sculpts: [string, string, string][];
+    colorways: [number, string, string][];
+  }
+
+  let light: LightIndex | null = null;
+  let cw: CwIndex | null = null;
+  let lightLoading: Promise<void> | null = null;
+  let cwLoading: Promise<void> | null = null;
+
+  function loadLight() {
+    lightLoading ??= fetch(`${BASE}/search-index.json`)
+      .then((r) => r.json())
+      .then((j) => {
+        light = j;
+      })
+      .catch(() => {});
+    return lightLoading;
+  }
+  function loadCw() {
+    cwLoading ??= fetch(`${BASE}/search-colorways.json`)
+      .then((r) => r.json())
+      .then((j) => {
+        cw = j;
+      })
+      .catch(() => {});
+    return cwLoading;
+  }
+
+  /** Rank: prefix on any word = 2, substring = 1, none = 0. */
+  function score(haystack: string, q: string): number {
+    const h = haystack.toLowerCase();
+    const i = h.indexOf(q);
+    if (i < 0) return 0;
+    return i === 0 || h[i - 1] === ' ' ? 2 : 1;
+  }
+
+  function esc(s: string): string {
+    return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+  }
+
+  function render(q: string) {
+    if (!panel || !input) return;
+    if (q.length < 2) {
+      panel.hidden = true;
+      panel.innerHTML = '';
+      return;
+    }
+    const ql = q.toLowerCase();
+    let html = '';
+
+    if (light) {
+      const makers = light.makers
+        .map((m) => ({ s: score(m.n, ql), m }))
+        .filter((x) => x.s > 0)
+        .sort((a, b) => b.s - a.s)
+        .slice(0, 5);
+      const sculpts = light.sculpts
+        .map((s) => ({ s: score(`${s.m} ${s.n}`, ql), v: s }))
+        .filter((x) => x.s > 0)
+        .sort((a, b) => b.s - a.s)
+        .slice(0, 8);
+      if (makers.length) {
+        html += '<div class="sr-group">Makers</div>';
+        for (const { m } of makers)
+          html += `<a class="sr-row" href="${BASE}${m.u}">${esc(m.n)}</a>`;
+      }
+      if (sculpts.length) {
+        html += '<div class="sr-group">Sculpts</div>';
+        for (const { v } of sculpts)
+          html += `<a class="sr-row" href="${BASE}${v.u}"><span>${esc(v.n)}</span><span class="sr-context">${esc(v.m)}</span></a>`;
+      }
+    }
+
+    if (cw) {
+      const hits: { s: number; name: string; ctx: string; href: string }[] = [];
+      for (const [si, name, id] of cw.colorways) {
+        const sc = score(name, ql);
+        if (sc > 0) {
+          const [sName, mName, url] = cw.sculpts[si];
+          hits.push({
+            s: sc,
+            name,
+            ctx: `${mName} / ${sName}`,
+            href: `${BASE}${url}#${id}`,
+          });
+          if (hits.length > 400) break;
+        }
+      }
+      hits.sort((a, b) => b.s - a.s);
+      const top = hits.slice(0, 15);
+      if (top.length) {
+        html += '<div class="sr-group">Colorways</div>';
+        for (const h of top)
+          html += `<a class="sr-row" href="${h.href}"><span>${esc(h.name)}</span><span class="sr-context">${esc(h.ctx)}</span></a>`;
+      }
+    } else if (cwLoading) {
+      html += '<div class="sr-note">loading colorway index</div>';
+    }
+
+    panel.innerHTML = html || '<div class="sr-note">no matches in the archive</div>';
+    panel.hidden = false;
+  }
+
+  let t: ReturnType<typeof setTimeout>;
+  input?.addEventListener('focus', () => loadLight());
+  input?.addEventListener('input', () => {
+    clearTimeout(t);
+    t = setTimeout(async () => {
+      const q = input.value.trim();
+      if (q.length >= 2) {
+        await loadLight();
+        // kick off colorway load; re-render when it lands
+        loadCw().then(() => render(input.value.trim()));
+      }
+      render(q);
+    }, 120);
+  });
+
+  // keyboard: arrows move, enter follows, escape closes
+  input?.addEventListener('keydown', (e) => {
+    if (!panel || panel.hidden) return;
+    const rows = [...panel.querySelectorAll<HTMLAnchorElement>('.sr-row')];
+    if (!rows.length) return;
+    const cur = rows.findIndex((r) => r.hasAttribute('data-active'));
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const next = e.key === 'ArrowDown' ? Math.min(cur + 1, rows.length - 1) : Math.max(cur - 1, 0);
+      rows.forEach((r) => r.removeAttribute('data-active'));
+      rows[next].setAttribute('data-active', '');
+      rows[next].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter' && cur >= 0) {
+      e.preventDefault();
+      rows[cur].click();
+    } else if (e.key === 'Escape') {
+      panel.hidden = true;
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (panel && !document.getElementById('ka-search')?.contains(e.target as Node)) {
+      panel.hidden = true;
+    }
+  });
+</script>

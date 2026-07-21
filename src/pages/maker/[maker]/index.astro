@@ -1,0 +1,152 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { Image } from 'astro:assets';
+import { getCatalog, withBase, img } from '../../../lib/catalog.js';
+
+export async function getStaticPaths() {
+  const { makers } = await getCatalog();
+  return makers.map((maker) => ({
+    params: { maker: maker.slug },
+    props: { maker },
+  }));
+}
+
+const { maker } = Astro.props;
+
+const logoModules = import.meta.glob('../../../assets/logos/*.{jpg,png}', {
+  eager: true,
+});
+const logo = Object.entries(logoModules).find(([p]) =>
+  p.includes(`/${maker.id}.`)
+)?.[1]?.default;
+
+const links = [
+  ['website', maker.website],
+  ['instagram', maker.instagram],
+  ['discord', maker.discord],
+  ['source doc', maker.src],
+].filter(([, url]) => url);
+
+const fmt = (n) => n.toLocaleString('en-US');
+const hasAttrs = maker.sculpts.some((s) => s.profile || s.design || s.cast);
+const hasDates = maker.sculpts.some((s) => s.releaseDate);
+---
+
+<Base title={maker.name} description={`${maker.name}: ${maker.sculpts.length} sculpts and ${maker.colorwayCount} artisan keycap colorways in the archive.`}>
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href={withBase('/')}>index</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">{maker.name.toLowerCase()}</span>
+  </nav>
+
+  <div class="maker-head">
+    {logo && <Image class="logo" src={logo} alt="" width={112} height={112} quality={75} />}
+    <div>
+      <h1 class="page-title">{maker.name}</h1>
+      <p class="mono-dim meta">
+        {maker.id}
+        {maker.nationality ? ` / ${maker.nationality.toUpperCase()}` : ''}
+        {` / ${maker.sculpts.length} sculpt${maker.sculpts.length === 1 ? '' : 's'}`}
+        {` / ${fmt(maker.colorwayCount)} colorway${maker.colorwayCount === 1 ? '' : 's'}`}
+        {maker.selfOrder ? ' / self-order' : ''}
+      </p>
+      {links.length > 0 && (
+        <p class="links">
+          {links.map(([label, url]) => (
+            <a class="data-link" href={url} rel="noopener">{label}</a>
+          ))}
+        </p>
+      )}
+    </div>
+  </div>
+
+  {
+    maker.sculpts.length === 0 ? (
+      <p class="empty">no sculpts catalogued for this maker yet</p>
+    ) : (
+      <table class="index">
+        <thead>
+          <tr>
+            <th class="thumb-cell"><span class="visually-hidden">Cover</span></th>
+            <th>Sculpt</th>
+            <th class="num">Colorways</th>
+            {hasAttrs && <th class="attr-col">Profile</th>}
+            {hasAttrs && <th class="attr-col">Design</th>}
+            {hasAttrs && <th class="attr-col">Cast</th>}
+            {hasDates && <th class="attr-col">Released</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {maker.sculpts.map((s) => (
+            <tr data-preview={s.cover ? img.thumb(s.cover.id) : undefined}>
+              <td class="thumb-cell">
+                {s.cover ? (
+                  <img src={img.thumb(s.cover.id)} alt="" width="28" height="28" loading="lazy" decoding="async" />
+                ) : (
+                  <span class="no-logo" aria-hidden="true" />
+                )}
+              </td>
+              <td>
+                <a class="row-link" href={withBase(s.url)}>{s.name}</a>
+              </td>
+              <td class="num">{s.colorways.length}</td>
+              {hasAttrs && <td class="attr-col mono-dim">{s.profile ?? ''}</td>}
+              {hasAttrs && <td class="attr-col mono-dim">{s.design ?? ''}</td>}
+              {hasAttrs && <td class="attr-col mono-dim">{s.cast ?? ''}</td>}
+              {hasDates && <td class="attr-col mono-dim">{s.releaseDate ?? ''}</td>}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )
+  }
+</Base>
+
+<style>
+  .maker-head {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding-bottom: 18px;
+    margin-bottom: 4px;
+  }
+  .maker-head :global(.logo) {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .meta {
+    margin: 4px 0 0;
+  }
+  .links {
+    margin: 8px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .no-logo {
+    display: block;
+    width: 28px;
+    height: 28px;
+    background: var(--bg-inset);
+  }
+  @media (max-width: 680px) {
+    .attr-col {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { initRowPreview } from '../../../scripts/row-preview.js';
+  initRowPreview();
+</script>

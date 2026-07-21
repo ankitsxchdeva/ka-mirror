@@ -1,0 +1,358 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { getCatalog, withBase, img } from '../../../lib/catalog.js';
+
+export async function getStaticPaths() {
+  const { makers } = await getCatalog();
+  return makers.flatMap((maker) =>
+    maker.sculpts.map((sculpt) => ({
+      params: { maker: maker.slug, sculpt: sculpt.slug },
+      props: { maker: { name: maker.name, slug: maker.slug, url: maker.url }, sculpt },
+    }))
+  );
+}
+
+const { maker, sculpt } = Astro.props;
+
+const attrs = [sculpt.profile, sculpt.design, sculpt.cast, sculpt.releaseDate]
+  .filter(Boolean)
+  .join(' / ');
+
+// Everything the lightbox needs, keyed by colorway id. Image URLs are
+// derived client-side from the id to keep large pages light.
+const lightboxData = Object.fromEntries(
+  sculpt.colorways.map((c) => [
+    c.id,
+    {
+      name: c.name || 'Unnamed',
+      releaseDate: c.releaseDate || null,
+      totalCount: c.totalCount || null,
+      note: c.note || null,
+      photoCredit: c.photoCredit || null,
+      commissioned: !!c.commissioned,
+      giveaway: !!c.giveaway,
+      stemType: Array.isArray(c.stemType) ? c.stemType.join(', ') : null,
+    },
+  ])
+);
+const many = sculpt.colorways.length > 24;
+---
+
+<Base
+  title={`${sculpt.name} · ${maker.name}`}
+  description={`${sculpt.name} by ${maker.name}: ${sculpt.colorways.length} artisan keycap colorways.`}
+>
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href={withBase('/')}>index</a>
+    <span aria-hidden="true">/</span>
+    <a href={withBase(maker.url)}>{maker.name.toLowerCase()}</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">{sculpt.name.toLowerCase()}</span>
+  </nav>
+
+  <div class="toolbar">
+    <div>
+      <h1 class="page-title">{sculpt.name}</h1>
+      <p class="mono-dim meta">
+        {sculpt.id} / {sculpt.colorways.length} colorway{sculpt.colorways.length === 1 ? '' : 's'}
+        {attrs ? ` / ${attrs}` : ''}
+      </p>
+    </div>
+    {many && (
+      <input id="cw-filter" type="text" placeholder="filter colorways" aria-label="Filter colorways" />
+    )}
+  </div>
+
+  <div class="sheet" id="sheet">
+    {
+      sculpt.colorways.map((c) => (
+        <button
+          class="plate"
+          id={c.id}
+          data-cw={c.id}
+          data-name={(c.name || 'unnamed').toLowerCase()}
+          aria-label={`View ${c.name || 'unnamed colorway'}`}
+        >
+          <span class="plate-img">
+            <img
+              src={img.thumb(c.id)}
+              alt={c.name || 'Unnamed colorway'}
+              width="250"
+              height="250"
+              loading="lazy"
+              decoding="async"
+            />
+          </span>
+          <span class="plate-cap">
+            <span class="name">{c.name || 'Unnamed'}</span>
+            <span class="id">{c.id}{c.releaseDate ? ` / ${c.releaseDate}` : ''}</span>
+          </span>
+        </button>
+      ))
+    }
+  </div>
+  <p class="empty" id="no-match" hidden>no colorways match that filter</p>
+
+  <dialog id="lightbox" aria-label="Colorway details">
+    <div class="lb-frame">
+      <img id="lb-img" alt="" />
+    </div>
+    <div class="lb-side">
+      <p class="microhead">{maker.name} / {sculpt.name}</p>
+      <h2 id="lb-name"></h2>
+      <p class="mono-dim" id="lb-id"></p>
+      <dl id="lb-meta"></dl>
+      <div class="lb-actions">
+        <button id="lb-copy" class="data-link">copy link</button>
+        <a id="lb-full" class="data-link" target="_blank" rel="noopener">full image</a>
+      </div>
+      <div class="lb-nav mono-dim">
+        <button id="lb-prev" class="data-link" aria-label="Previous colorway">prev</button>
+        <button id="lb-next" class="data-link" aria-label="Next colorway">next</button>
+        <button id="lb-close" class="data-link" aria-label="Close">close</button>
+        <span class="lb-hint"><kbd>←</kbd> <kbd>→</kbd> <kbd>esc</kbd></span>
+      </div>
+    </div>
+  </dialog>
+
+  <script type="application/json" id="cw-data" set:html={JSON.stringify(lightboxData)} />
+</Base>
+
+<style>
+  .meta {
+    margin: 4px 0 0;
+  }
+
+  dialog#lightbox {
+    border: 1px solid var(--line-strong);
+    border-radius: 0;
+    background: var(--bg-panel);
+    color: var(--ink);
+    padding: 0;
+    width: min(920px, calc(100vw - 24px));
+    max-height: calc(100dvh - 40px);
+    display: none;
+    grid-template-columns: 1.5fr 1fr;
+    overflow: hidden;
+  }
+  dialog#lightbox[open] {
+    display: grid;
+  }
+  dialog#lightbox::backdrop {
+    background: var(--overlay);
+  }
+  .lb-frame {
+    background: var(--bg-inset);
+    display: grid;
+    place-items: center;
+    min-height: 300px;
+    border-right: 1px solid var(--line);
+  }
+  .lb-frame img {
+    width: 100%;
+    height: 100%;
+    max-height: calc(100dvh - 40px);
+    object-fit: contain;
+  }
+  .lb-side {
+    padding: 18px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .lb-side h2 {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.25;
+    margin: 2px 0 0;
+  }
+  .lb-side p {
+    margin: 0;
+  }
+  #lb-meta {
+    margin: 10px 0 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 14px;
+    font-size: 0.8125rem;
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+  }
+  #lb-meta:empty {
+    border-top: none;
+    padding-top: 0;
+    margin: 0;
+  }
+  #lb-meta :global(dt) {
+    font-family: var(--mono);
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    align-self: baseline;
+    padding-top: 2px;
+  }
+  #lb-meta :global(dd) {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .lb-actions {
+    display: flex;
+    gap: 14px;
+    margin-top: 12px;
+  }
+  .lb-nav {
+    margin-top: auto;
+    padding-top: 16px;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .lb-hint {
+    margin-left: auto;
+    display: inline-flex;
+    gap: 4px;
+  }
+  @media (max-width: 700px) {
+    dialog#lightbox[open] {
+      grid-template-columns: 1fr;
+      overflow-y: auto;
+    }
+    .lb-frame {
+      border-right: none;
+      border-bottom: 1px solid var(--line);
+    }
+    .lb-frame img {
+      max-height: 52dvh;
+    }
+    .lb-hint {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const CDN = 'https://cdn.keycap-archivist.com/keycaps';
+  const data = JSON.parse(document.getElementById('cw-data')!.textContent!) as Record<
+    string,
+    {
+      name: string;
+      releaseDate: string | null;
+      totalCount: number | null;
+      note: string | null;
+      photoCredit: string | null;
+      commissioned: boolean;
+      giveaway: boolean;
+      stemType: string | null;
+    }
+  >;
+  const ids = Object.keys(data);
+  const dialog = document.getElementById('lightbox') as HTMLDialogElement;
+  const $ = (id: string) => document.getElementById(id)!;
+  let current = '';
+
+  function esc(s: string): string {
+    return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+  }
+
+  function show(id: string) {
+    const c = data[id];
+    if (!c) return;
+    current = id;
+    const full = `${CDN}/${id}.jpg`;
+    const imgEl = $('lb-img') as HTMLImageElement;
+    imgEl.src = `${CDN}/720/${id}.jpg`;
+    imgEl.onerror = () => {
+      imgEl.onerror = null;
+      imgEl.src = full;
+    };
+    imgEl.alt = c.name;
+    $('lb-name').textContent = c.name;
+    $('lb-id').textContent = id;
+    ($('lb-full') as HTMLAnchorElement).href = full;
+
+    const rows: [string, string][] = [];
+    if (c.releaseDate) rows.push(['Released', c.releaseDate]);
+    if (c.totalCount) rows.push(['Made', String(c.totalCount)]);
+    if (c.stemType) rows.push(['Stem', c.stemType]);
+    if (c.commissioned) rows.push(['Type', 'Commissioned']);
+    if (c.giveaway) rows.push(['Type', 'Giveaway']);
+    if (c.photoCredit) rows.push(['Photo', c.photoCredit]);
+    if (c.note) rows.push(['Note', c.note]);
+    $('lb-meta').innerHTML = rows
+      .map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`)
+      .join('');
+
+    history.replaceState(null, '', `#${id}`);
+    if (!dialog.open) dialog.showModal();
+  }
+
+  function close() {
+    if (dialog.open) dialog.close();
+  }
+  dialog.addEventListener('close', () => {
+    history.replaceState(null, '', location.pathname + location.search);
+  });
+
+  function step(delta: number) {
+    const i = ids.indexOf(current);
+    if (i < 0) return;
+    show(ids[(i + delta + ids.length) % ids.length]);
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('.plate').forEach((b) =>
+    b.addEventListener('click', () => show(b.dataset.cw!))
+  );
+  $('lb-close').addEventListener('click', close);
+  $('lb-prev').addEventListener('click', () => step(-1));
+  $('lb-next').addEventListener('click', () => step(1));
+  $('lb-copy').addEventListener('click', async () => {
+    await navigator.clipboard.writeText(location.href);
+    $('lb-copy').textContent = 'copied';
+    setTimeout(() => ($('lb-copy').textContent = 'copy link'), 1500);
+  });
+  dialog.addEventListener('click', (e) => {
+    if (e.target === dialog) close();
+  });
+  dialog.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') step(-1);
+    if (e.key === 'ArrowRight') step(1);
+  });
+
+  // If a 250px thumb is missing on the CDN, fall back to the original image.
+  document.querySelectorAll<HTMLImageElement>('.plate-img img').forEach((el) => {
+    el.addEventListener(
+      'error',
+      () => {
+        const id = el.closest('.plate')?.id;
+        if (id) el.src = `${CDN}/${id}.jpg`;
+      },
+      { once: true }
+    );
+  });
+
+  // Inline filter (rendered only for sheets over 24 plates).
+  const filter = document.getElementById('cw-filter') as HTMLInputElement | null;
+  if (filter) {
+    const noMatch = document.getElementById('no-match')!;
+    filter.addEventListener('input', () => {
+      const q = filter.value.trim().toLowerCase();
+      let any = false;
+      document.querySelectorAll<HTMLButtonElement>('.plate').forEach((p) => {
+        const hit = !q || p.dataset.name!.includes(q) || p.id.includes(q);
+        p.hidden = !hit;
+        if (hit) any = true;
+      });
+      noMatch.hidden = any;
+    });
+  }
+
+  // Deep link: /maker/x/sculpt#<colorwayId> opens the lightbox directly.
+  const hash = location.hash.slice(1);
+  if (hash && data[hash]) {
+    document.getElementById(hash)?.scrollIntoView({ block: 'center' });
+    show(hash);
+  }
+</script>

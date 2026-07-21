@@ -1,0 +1,463 @@
+/* ---------------------------------------------------------------------------
+   Keycap Archivist Mirror. Archival database tool: card catalog / contact
+   sheet as a modern data UI. Cool graphite neutrals, one vermilion accent
+   for state only, IBM Plex Sans for UI, IBM Plex Mono for all data.
+   Radius 0, hairlines organize, motion is hover/focus color shifts only.
+--------------------------------------------------------------------------- */
+
+:root {
+  --bg: oklch(0.16 0.005 250);
+  --bg-panel: oklch(0.19 0.006 250);
+  --bg-hover: oklch(0.225 0.007 250);
+  --bg-inset: oklch(0.13 0.005 250);
+  --line: oklch(0.28 0.008 250);
+  --line-strong: oklch(0.4 0.01 250);
+  --ink: oklch(0.92 0.004 250);
+  --ink-mid: oklch(0.74 0.006 250);
+  --ink-dim: oklch(0.62 0.008 250);
+  --accent: oklch(0.64 0.17 30);
+  --accent-wash: oklch(0.64 0.17 30 / 0.1);
+  --overlay: oklch(0.1 0.005 250 / 0.8);
+
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --gutter: clamp(16px, 3vw, 32px);
+  --t: 150ms cubic-bezier(0.25, 1, 0.5, 1);
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --bg: oklch(0.965 0.003 90);
+  --bg-panel: oklch(0.99 0.002 90);
+  --bg-hover: oklch(0.925 0.004 90);
+  --bg-inset: oklch(0.935 0.004 90);
+  --line: oklch(0.87 0.004 90);
+  --line-strong: oklch(0.72 0.006 90);
+  --ink: oklch(0.24 0.005 250);
+  --ink-mid: oklch(0.42 0.006 250);
+  --ink-dim: oklch(0.52 0.006 250);
+  --accent: oklch(0.54 0.18 30);
+  --accent-wash: oklch(0.54 0.18 30 / 0.09);
+  --overlay: oklch(0.3 0.005 250 / 0.55);
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px var(--gutter) 56px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 0;
+}
+
+input[type='search'],
+input[type='text'] {
+  font: inherit;
+  color: var(--ink);
+  background: var(--bg-inset);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  padding: 5px 10px;
+}
+
+input[type='search']::placeholder,
+input[type='text']::placeholder {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-dim);
+}
+
+input[type='search']:focus,
+input[type='text']:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* ---- type roles --------------------------------------------------------- */
+
+.mono {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-mid);
+}
+
+.mono-dim {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--ink-dim);
+}
+
+.microhead {
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.page-title {
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.crumbs {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--ink-dim);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.crumbs a:hover,
+a.quiet-link:hover {
+  color: var(--accent);
+}
+
+a.data-link {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-mid);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--line-strong);
+  transition: color var(--t);
+}
+
+a.data-link:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+/* ---- index tables ------------------------------------------------------- */
+
+.index {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.index th {
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line-strong);
+  white-space: nowrap;
+}
+
+.index td {
+  padding: 0 10px;
+  height: 42px;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.8125rem;
+  vertical-align: middle;
+}
+
+.index .num {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  text-align: right;
+  color: var(--ink-mid);
+  font-variant-numeric: tabular-nums;
+}
+
+.index th.num {
+  text-align: right;
+}
+
+.index tbody tr {
+  transition: background-color var(--t);
+}
+
+.index tbody tr:hover {
+  background: var(--bg-hover);
+}
+
+.index .row-link {
+  display: block;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.index .row-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.index tbody tr {
+  position: relative;
+}
+
+.index .above-link {
+  position: relative;
+  z-index: 1;
+}
+
+.thumb-cell {
+  width: 40px;
+  padding-right: 0 !important;
+}
+
+.thumb-cell img {
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
+  background: var(--bg-inset);
+}
+
+.group-head td {
+  height: 30px;
+  background: var(--bg-panel);
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--ink-dim);
+  border-bottom: 1px solid var(--line);
+}
+
+/* ---- toolbar above tables/sheets ---------------------------------------- */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px 20px;
+  margin: 4px 0 14px;
+}
+
+.toolbar input {
+  width: min(280px, 100%);
+}
+
+/* ---- contact sheet ------------------------------------------------------ */
+
+.sheet {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 2px;
+}
+
+@media (min-width: 700px) {
+  .sheet {
+    grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  }
+}
+
+.plate {
+  background: var(--bg-panel);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  transition: background-color var(--t);
+}
+
+.plate:hover {
+  background: var(--bg-hover);
+}
+
+.plate-img {
+  aspect-ratio: 1;
+  background: var(--bg-inset);
+  overflow: hidden;
+}
+
+.plate-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.plate-cap {
+  padding: 6px 8px 8px;
+  min-height: 46px;
+}
+
+.plate-cap .name {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.3;
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.plate-cap .id {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--ink-dim);
+}
+
+.plate:hover .id {
+  color: var(--accent);
+}
+
+.plate:target,
+tr:target {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* ---- pin star ----------------------------------------------------------- */
+
+.pin {
+  font-size: 0.8rem;
+  line-height: 1;
+  color: var(--ink-dim);
+  opacity: 0;
+  transition: opacity var(--t), color var(--t);
+  padding: 6px;
+}
+
+tr:hover .pin,
+.pin:focus-visible,
+.pin[aria-pressed='true'] {
+  opacity: 1;
+}
+
+.pin[aria-pressed='true'] {
+  color: var(--accent);
+}
+
+/* ---- hover preview panel ------------------------------------------------ */
+
+#row-preview {
+  position: fixed;
+  z-index: 30;
+  width: 210px;
+  pointer-events: none;
+  background: var(--bg-panel);
+  border: 1px solid var(--line-strong);
+  padding: 2px;
+  display: none;
+}
+
+#row-preview img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: var(--bg-inset);
+}
+
+@media (hover: hover) and (min-width: 900px) {
+  #row-preview.show {
+    display: block;
+  }
+}
+
+/* ---- prose (about, 404) ------------------------------------------------- */
+
+.prose {
+  max-width: 62ch;
+}
+
+.prose p {
+  line-height: 1.6;
+  font-size: 0.9375rem;
+}
+
+.prose h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 28px 0 8px;
+}
+
+.prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.prose code {
+  font-family: var(--mono);
+  font-size: 0.8em;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  padding: 1px 4px;
+}
+
+.empty {
+  color: var(--ink-dim);
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  padding: 32px 0;
+}
+
+kbd {
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  color: var(--ink-dim);
+  border: 1px solid var(--line);
+  padding: 1px 5px;
+  background: var(--bg-panel);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

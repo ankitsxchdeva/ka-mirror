@@ -1,0 +1,77 @@
+---
+import '@fontsource/ibm-plex-sans/400.css';
+import '@fontsource/ibm-plex-sans/500.css';
+import '@fontsource/ibm-plex-sans/600.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import { withBase } from '../lib/catalog.js';
+
+const { title, description = 'A community archive of artisan keycaps: makers, sculpts, and colorways, catalogued from the makers’ own docs.' } = Astro.props;
+const fullTitle = title ? `${title} · Keycap Archivist Mirror` : 'Keycap Archivist Mirror';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <script is:inline>
+      // No-flash theme init: stored preference wins, else system preference.
+      (() => {
+        const stored = localStorage.getItem('ka-theme');
+        const light =
+          stored === 'light' ||
+          (!stored && window.matchMedia('(prefers-color-scheme: light)').matches);
+        if (light) document.documentElement.dataset.theme = 'light';
+      })();
+    </script>
+  </head>
+  <body>
+    <Header />
+    <main>
+      <slot />
+    </main>
+    <footer>
+      <div class="foot-inner mono-dim">
+        <span>
+          Read-only mirror of <a href="https://keycap-archivist.com">keycap-archivist.com</a>.
+          Data belongs to the <a href="https://github.com/keycap-archivist/database">community database</a>
+          and the makers.
+        </span>
+        <a href={withBase('/about/')}>About this mirror</a>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 14px var(--gutter);
+  }
+  .foot-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 24px;
+  }
+  footer a {
+    color: var(--ink-mid);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--line-strong);
+  }
+  footer a:hover {
+    color: var(--accent);
+  }
+</style>
