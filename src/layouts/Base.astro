@@ -41,14 +41,40 @@ const fullTitle = title ? `${title} · Keycap Archivist Mirror` : 'Keycap Archiv
     </script>
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <Header />
     <noscript>
       <span class="noscript-note">
         Browsing works without JavaScript; search and the image viewer need it.
       </span>
     </noscript>
-    <main>
+    <main id="main" tabindex="-1">
       <slot />
     </main>
+    <script>
+      import '../scripts/keyboard.js';
+    </script>
   </body>
 </html>
+
+<style>
+  .skip-link {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 50;
+    background: var(--accent);
+    color: var(--bg);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius);
+    transform: translateY(-200%);
+  }
+  .skip-link:focus-visible {
+    transform: none;
+  }
+  main:focus {
+    outline: none;
+  }
+</style>
