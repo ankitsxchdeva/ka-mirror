@@ -5,12 +5,11 @@
  */
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-const dataDir = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '../../data'
-);
+// Resolve from the project root (where astro runs), not this module's
+// location: the bundled chunk's directory depth changes between Astro
+// versions and build modes.
+const dataDir = path.resolve(process.cwd(), 'data');
 
 export function slugify(name) {
   return (

@@ -19,15 +19,31 @@ const logos = Object.fromEntries(
 ---
 
 <Base description="Browse artisan keycap makers, sculpts, and colorways.">
-  <h1 class="visually-hidden">Makers</h1>
   <section id="pinned-section" hidden>
-    <p class="sub pinned-label">Pinned</p>
+    <h2 class="sub group-label">Pinned</h2>
     <div class="grid" id="pinned-grid"></div>
   </section>
+  <div class="grid-head">
+    <h1 class="sub group-label">Makers</h1>
+    <select id="maker-sort" aria-label="Sort makers">
+      <option value="az">A-Z</option>
+      <option value="za">Z-A</option>
+      <option value="sculpts-desc">Most sculpts</option>
+      <option value="sculpts-asc">Fewest sculpts</option>
+      <option value="cw-desc">Most colorways</option>
+      <option value="cw-asc">Fewest colorways</option>
+    </select>
+  </div>
   <div class="grid" id="maker-grid">
     {
       makers.map((m, i) => (
-        <article class="card" data-maker-id={m.id}>
+        <article
+          class="card"
+          data-maker-id={m.id}
+          data-name={m.name.toLowerCase()}
+          data-sculpts={m.sculpts.length}
+          data-colorways={m.colorwayCount}
+        >
           <div class="card-img logo-tile">
             {logos[m.id] ? (
               <Image
@@ -38,7 +54,7 @@ const logos = Object.fromEntries(
                 loading={i < 12 ? 'eager' : 'lazy'}
               />
             ) : (
-              <!-- the ⃠ mark, drawn as SVG so it renders identically everywhere -->
+              /* the ⃠ mark, drawn as SVG so it renders identically everywhere */
               <svg class="no-logo" viewBox="0 0 48 48" fill="none" aria-hidden="true">
                 <circle cx="24" cy="24" r="17" stroke="currentColor" stroke-width="2.5" />
                 <path d="M12 12 L36 36" stroke="currentColor" stroke-width="2.5" />
@@ -50,8 +66,7 @@ const logos = Object.fromEntries(
               <span class="card-name">{m.name}</span>
             </a>
             <span class="card-sub">
-              {m.sculpts.length} sculpt{m.sculpts.length === 1 ? '' : 's'} /
-              {m.colorwayCount.toLocaleString('en-US')} colorway{m.colorwayCount === 1 ? '' : 's'}
+              {`${m.sculpts.length} sculpt${m.sculpts.length === 1 ? '' : 's'} / ${m.colorwayCount.toLocaleString('en-US')} colorway${m.colorwayCount === 1 ? '' : 's'}`}
             </span>
           </div>
           <button
@@ -68,13 +83,6 @@ const logos = Object.fromEntries(
 </Base>
 
 <style>
-  .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
   .no-logo {
     width: 44px;
     height: 44px;
@@ -83,17 +91,29 @@ const logos = Object.fromEntries(
   #pinned-section {
     margin-bottom: 20px;
   }
-  .pinned-label {
+  .group-label {
+    font-weight: 500;
     margin: 0 0 8px;
+  }
+  .grid-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .grid-head .group-label {
+    margin: 0;
   }
 </style>
 
 <script>
-  // Pinned makers (localStorage): pinned cards move into their own section
-  // above the main grid; unpinning returns a card to its alphabetical spot.
-  // Re-runs on every client-side navigation (astro:page-load), so all state
-  // is derived from the current DOM inside init().
+  // Pinned makers (localStorage) live in their own section above the main
+  // grid; the sort select orders the main grid. Both persist. Re-runs on
+  // every client-side navigation (astro:page-load), so all state is derived
+  // from the current DOM inside init().
   const KEY = 'ka-pinned-makers';
+  const SORT_KEY = 'ka-sort';
   const read = (): string[] => {
     try {
       return JSON.parse(localStorage.getItem(KEY) ?? '[]');
@@ -102,19 +122,35 @@ const logos = Object.fromEntries(
     }
   };
 
+  type Card = HTMLElement;
+  const comparators: Record<string, (a: Card, b: Card) => number> = {
+    az: (a, b) => a.dataset.name!.localeCompare(b.dataset.name!, 'en'),
+    za: (a, b) => b.dataset.name!.localeCompare(a.dataset.name!, 'en'),
+    'sculpts-desc': (a, b) => +b.dataset.sculpts! - +a.dataset.sculpts! || comparators.az(a, b),
+    'sculpts-asc': (a, b) => +a.dataset.sculpts! - +b.dataset.sculpts! || comparators.az(a, b),
+    'cw-desc': (a, b) => +b.dataset.colorways! - +a.dataset.colorways! || comparators.az(a, b),
+    'cw-asc': (a, b) => +a.dataset.colorways! - +b.dataset.colorways! || comparators.az(a, b),
+  };
+  const readSort = (): string => {
+    const s = localStorage.getItem(SORT_KEY) ?? 'az';
+    return s in comparators ? s : 'az';
+  };
+
   function init() {
     const grid = document.getElementById('maker-grid');
     const section = document.getElementById('pinned-section');
     const pinnedGrid = document.getElementById('pinned-grid');
-    if (!grid || !section || !pinnedGrid || grid.dataset.bound) return;
+    const sortSel = document.getElementById('maker-sort') as HTMLSelectElement | null;
+    if (!grid || !section || !pinnedGrid || !sortSel || grid.dataset.bound) return;
     grid.dataset.bound = '1';
 
-    const original = [...grid.children];
+    const cards = [...grid.children] as Card[];
 
     function apply(pinned: string[]) {
-      // Restore alphabetical order in the main grid, then pull pinned cards
-      // (in pin order) into the pinned grid.
-      original.forEach((c) => grid!.appendChild(c));
+      // Sort all cards into the main grid, then pull pinned cards (in pin
+      // order) into the pinned grid.
+      const sorted = [...cards].sort(comparators[readSort()]);
+      sorted.forEach((c) => grid!.appendChild(c));
       for (const id of pinned) {
         const card = grid!.querySelector(`[data-maker-id="${id}"]`);
         if (card) pinnedGrid!.appendChild(card);
@@ -125,7 +161,13 @@ const logos = Object.fromEntries(
       });
     }
 
+    sortSel.value = readSort();
     apply(read());
+
+    sortSel.addEventListener('change', () => {
+      localStorage.setItem(SORT_KEY, sortSel.value);
+      apply(read());
+    });
 
     const onStarClick = (e: Event) => {
       const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-star]');

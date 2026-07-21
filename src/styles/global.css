@@ -104,6 +104,22 @@ input[type='text']::placeholder {
   color: var(--ink-dim);
 }
 
+select {
+  font: inherit;
+  font-size: 0.75rem;
+  color: var(--ink-mid);
+  background: var(--bg-inset);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 input[type='search']:focus,
 input[type='text']:focus {
   outline: none;
