@@ -70,7 +70,34 @@ export async function getCatalog() {
     revision = { revision: 'unknown', fetchedAt: null };
   }
 
-  makers.sort((a, b) => a.name.localeCompare(b.name, 'en'));
+  // Skip malformed upstream entries rather than failing the whole build.
+  const cleanName = (name) => (typeof name === 'string' && name.trim()) || 'Unnamed';
+  let skipped = 0;
+  makers = makers.filter((maker) => {
+    if (!maker || typeof maker !== 'object' || !maker.id) {
+      skipped++;
+      return false;
+    }
+    maker.name = cleanName(maker.name);
+    const sculpts = Array.isArray(maker.sculpts) ? maker.sculpts : [];
+    maker.sculpts = sculpts.filter((sculpt) => {
+      if (!sculpt || typeof sculpt !== 'object' || !sculpt.id) {
+        skipped++;
+        return false;
+      }
+      sculpt.name = cleanName(sculpt.name);
+      const colorways = Array.isArray(sculpt.colorways) ? sculpt.colorways : [];
+      // Colorway images key off the id, so id-less colorways are unusable.
+      sculpt.colorways = colorways.filter((c) => c && typeof c === 'object' && c.id);
+      skipped += colorways.length - sculpt.colorways.length;
+      return true;
+    });
+    return true;
+  });
+  if (skipped) console.warn(`catalog: skipped ${skipped} malformed entries`);
+
+  // Tie-break on id so duplicate-name slugs stay stable across builds.
+  makers.sort((a, b) => a.name.localeCompare(b.name, 'en') || a.id.localeCompare(b.id));
 
   const makerSlugs = new Set();
   for (const maker of makers) {
@@ -81,7 +108,9 @@ export async function getCatalog() {
     maker.url = `/maker/${slug}/`;
 
     const sculptSlugs = new Set();
-    maker.sculpts.sort((a, b) => a.name.localeCompare(b.name, 'en'));
+    maker.sculpts.sort(
+      (a, b) => a.name.localeCompare(b.name, 'en') || a.id.localeCompare(b.id)
+    );
     for (const sculpt of maker.sculpts) {
       let sSlug = slugify(sculpt.name);
       if (sculptSlugs.has(sSlug)) sSlug = `${sSlug}-${sculpt.id}`;

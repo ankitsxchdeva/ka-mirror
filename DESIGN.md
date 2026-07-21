@@ -42,7 +42,9 @@ minmax 150-180px columns. Page gutter clamp(16px, 3vw, 32px), max-width
 - Colorway card: square photo, name, muted id; anchor link that opens the
   lightbox (falls back to :target jump without JS).
 - Lightbox dialog: image left, name + details right, copy link, prev/next.
-- Pin star on maker cards, hover-reveal, accent when active.
+- Pin star on maker cards: always visible, muted grey by default, accent
+  when pinned. Pinned makers move to their own small "Pinned" section above
+  the main grid.
 - Inline filter input only on colorway galleries over 24 entries.
 
 ## Motion

@@ -61,11 +61,19 @@ const links = [
       <p class="empty">No sculpts catalogued for this maker yet.</p>
     ) : (
       <div class="grid">
-        {maker.sculpts.map((s) => (
+        {maker.sculpts.map((s, i) => (
           <article class="card">
             <div class="card-img">
               {s.cover ? (
-                <img src={img.thumb(s.cover.id)} alt="" width="250" height="250" loading="lazy" decoding="async" />
+                <img
+                  src={img.thumb(s.cover.id)}
+                  alt=""
+                  width="250"
+                  height="250"
+                  loading={i < 12 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  data-cover-id={s.cover.id}
+                />
               ) : (
                 <div />
               )}
@@ -119,3 +127,26 @@ const links = [
     font-size: 0.8125rem;
   }
 </style>
+
+<script>
+  // If a 250px cover thumb is missing on the CDN, fall back to the original.
+  const CDN = 'https://cdn.keycap-archivist.com/keycaps';
+
+  function init() {
+    const grid = document.querySelector<HTMLElement>('.grid');
+    if (!grid || grid.dataset.fallbackBound) return;
+    grid.dataset.fallbackBound = '1';
+    grid.querySelectorAll<HTMLImageElement>('img[data-cover-id]').forEach((el) => {
+      el.addEventListener(
+        'error',
+        () => {
+          el.src = `${CDN}/${el.dataset.coverId}.jpg`;
+        },
+        { once: true }
+      );
+    });
+  }
+
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

@@ -56,7 +56,7 @@ const many = sculpt.colorways.length > 24;
 
   <div class="grid">
     {
-      sculpt.colorways.map((c) => (
+      sculpt.colorways.map((c, i) => (
         <article class="card" id={c.id} data-name={(c.name || 'unnamed').toLowerCase()}>
           <a class="cw-open" href={`#${c.id}`} data-cw={c.id} aria-label={`View ${c.name || 'unnamed colorway'}`}>
             <span class="card-img">
@@ -65,7 +65,8 @@ const many = sculpt.colorways.length > 24;
                 alt={c.name || 'Unnamed colorway'}
                 width="250"
                 height="250"
-                loading="lazy"
+                loading={i < 12 ? 'eager' : 'lazy'}
+                fetchpriority={i === 0 ? 'high' : undefined}
                 decoding="async"
               />
             </span>
@@ -80,13 +81,13 @@ const many = sculpt.colorways.length > 24;
   </div>
   <p class="empty" id="no-match" hidden>No colorways match that filter.</p>
 
-  <dialog id="lightbox" aria-label="Colorway details">
+  <dialog id="lightbox" autofocus aria-labelledby="lb-name">
     <div class="lb-frame">
       <img id="lb-img" alt="" />
     </div>
     <div class="lb-side">
       <p class="sub">{maker.name} / {sculpt.name}</p>
-      <h2 id="lb-name"></h2>
+      <h2 id="lb-name" aria-live="polite"></h2>
       <dl id="lb-meta"></dl>
       <div class="lb-actions">
         <button id="lb-copy" class="text-link">Copy link</button>
@@ -201,6 +202,14 @@ const many = sculpt.colorways.length > 24;
     .lb-hint {
       display: none;
     }
+    .lb-actions button,
+    .lb-actions a,
+    .lb-nav button {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 10px 4px;
+    }
   }
 </style>
 
@@ -208,6 +217,13 @@ const many = sculpt.colorways.length > 24;
   // Re-runs on every client-side navigation (astro:page-load); all state and
   // element refs are scoped inside init() against the current DOM.
   const CDN = 'https://cdn.keycap-archivist.com/keycaps';
+
+  // Window listeners outlive client-side navigations, so each init() aborts
+  // the previous page's listeners before registering its own.
+  let hashAbort: AbortController | null = null;
+  // Latest page's hash-opener; re-invoked after every router navigation
+  // because same-page hash links fire astro:page-load without re-initing.
+  let currentOpenFromHash: (() => void) | null = null;
 
   function esc(s: string): string {
     return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -217,6 +233,9 @@ const many = sculpt.colorways.length > 24;
   const dialog = document.getElementById('lightbox') as HTMLDialogElement | null;
   if (!dialog || dialog.dataset.bound) return;
   dialog.dataset.bound = '1';
+  hashAbort?.abort();
+  const hashCtrl = new AbortController();
+  hashAbort = hashCtrl;
 
   const data = JSON.parse(document.getElementById('cw-data')!.textContent!) as Record<
     string,
@@ -262,7 +281,9 @@ const many = sculpt.colorways.length > 24;
       .map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`)
       .join('');
 
-    history.replaceState(null, '', `#${id}`);
+    // Preserve the router's history state; replacing it with null corrupts
+    // Astro ClientRouter forward/back navigation.
+    history.replaceState(history.state, '', `#${id}`);
     if (!dialog.open) dialog.showModal();
 
     // warm the neighbors so prev/next feel instant
@@ -276,13 +297,27 @@ const many = sculpt.colorways.length > 24;
     if (dialog.open) dialog.close();
   }
   dialog.addEventListener('close', () => {
-    history.replaceState(null, '', location.pathname + location.search);
+    history.replaceState(history.state, '', location.pathname + location.search);
+    // Deep-link and hashchange opens have no invoker for the browser to
+    // restore focus to; send it back to the current colorway's card link.
+    if (!document.activeElement || document.activeElement === document.body) {
+      document
+        .getElementById(current)
+        ?.querySelector<HTMLAnchorElement>('a.cw-open')
+        ?.focus();
+    }
   });
 
   function step(delta: number) {
-    const i = ids.indexOf(current);
-    if (i < 0) return;
-    show(ids[(i + delta + ids.length) % ids.length]);
+    // Step through visible cards only so Prev/Next respect the filter.
+    const visible = ids.filter((id) => !document.getElementById(id)?.hidden);
+    if (!visible.length) return;
+    const i = visible.indexOf(current);
+    if (i < 0) {
+      show(visible[0]);
+      return;
+    }
+    show(visible[(i + delta + visible.length) % visible.length]);
   }
 
   // Cards are anchor links so no-JS visitors still get a :target jump;
@@ -350,13 +385,26 @@ const many = sculpt.colorways.length > 24;
   }
 
   // Deep link: /maker/x/sculpt#<colorwayId> opens the lightbox directly.
-  const hash = location.hash.slice(1);
-  if (hash && data[hash]) {
-    document.getElementById(hash)?.scrollIntoView({ block: 'center' });
-    show(hash);
+  function openFromHash() {
+    const hash = location.hash.slice(1);
+    if (hash && data[hash]) {
+      document.getElementById(hash)?.scrollIntoView({ block: 'center' });
+      show(hash);
+    }
   }
+  openFromHash();
+  // Search results pointing at the current page only change the hash. Direct
+  // URL edits fire hashchange, but Astro's router intercepts link clicks and
+  // uses pushState (no hashchange), so we also re-check the hash on every
+  // astro:page-load below. The controller's signal drops the stale listener
+  // when a client-side navigation re-runs init().
+  window.addEventListener('hashchange', openFromHash, { signal: hashCtrl.signal });
+  currentOpenFromHash = openFromHash;
   }
 
   init();
-  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:page-load', () => {
+    init();
+    currentOpenFromHash?.();
+  });
 </script>

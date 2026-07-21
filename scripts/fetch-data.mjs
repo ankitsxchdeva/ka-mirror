@@ -47,9 +47,12 @@ await mkdir(dataDir, { recursive: true });
 
 let revision = 'master';
 try {
-  const res = await fetch(COMMITS_API, {
-    headers: { accept: 'application/vnd.github+json' },
-  });
+  const headers = { accept: 'application/vnd.github+json' };
+  // In CI a token avoids the low unauthenticated rate limit.
+  if (process.env.GITHUB_TOKEN) {
+    headers.authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  }
+  const res = await fetch(COMMITS_API, { headers });
   if (res.ok) {
     const commits = await res.json();
     revision = commits[0]?.sha ?? 'master';

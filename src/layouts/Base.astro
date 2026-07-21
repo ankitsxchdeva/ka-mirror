@@ -19,6 +19,7 @@ const fullTitle = title ? `${title} · Keycap Archivist Mirror` : 'Keycap Archiv
     <title>{fullTitle}</title>
     {description && <meta name="description" content={description} />}
     <meta name="theme-color" content="#1c1e24" />
+    <link rel="preconnect" href="https://cdn.keycap-archivist.com" />
     <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
     <meta property="og:title" content={fullTitle} />

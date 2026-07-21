@@ -14,9 +14,10 @@ permissions:
   pages: write
   id-token: write
 
+# Queue rather than cancel: cancelling mid-flight can break a Pages deployment.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -29,6 +30,9 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Fetch latest catalog
+        env:
+          # Authenticated GitHub API calls avoid the unauthenticated rate limit.
+          GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/fetch-data.mjs --force
       - name: Build site
         env:

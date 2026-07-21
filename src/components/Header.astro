@@ -10,17 +10,22 @@ import { withBase } from '../lib/catalog.js';
       <span class="tag">mirror</span>
     </a>
 
-    <div class="search" id="ka-search">
+    <div class="search" id="ka-search" role="search">
       <input
         id="ka-search-input"
         type="search"
         placeholder="Search makers, sculpts, colorways"
         autocomplete="off"
         spellcheck="false"
+        role="combobox"
         aria-label="Search the archive"
+        aria-expanded="false"
+        aria-controls="ka-search-panel"
+        aria-autocomplete="list"
+        aria-haspopup="listbox"
       />
       <kbd class="hint" aria-hidden="true">/</kbd>
-      <div class="search-panel" id="ka-search-panel" hidden></div>
+      <div class="search-panel" id="ka-search-panel" role="listbox" hidden></div>
     </div>
 
     <a
@@ -194,11 +199,14 @@ import { withBase } from '../lib/catalog.js';
 
 <script>
   // ---- theme toggle -------------------------------------------------------
-  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+  const themeToggle = document.getElementById('theme-toggle');
+  themeToggle?.setAttribute('aria-pressed', String(document.documentElement.dataset.theme === 'light'));
+  themeToggle?.addEventListener('click', () => {
     const root = document.documentElement;
     const light = root.dataset.theme !== 'light';
     if (light) root.dataset.theme = 'light';
     else delete root.dataset.theme;
+    themeToggle.setAttribute('aria-pressed', String(light));
     localStorage.setItem('ka-theme', light ? 'light' : 'dark');
   });
 
@@ -220,9 +228,10 @@ import { withBase } from '../lib/catalog.js';
     input?.select();
   });
 
+  // nl / kl are lowercased search keys, computed once after fetch.
   interface LightIndex {
-    makers: { n: string; u: string }[];
-    sculpts: { n: string; m: string; u: string }[];
+    makers: { n: string; u: string; nl: string }[];
+    sculpts: { n: string; m: string; u: string; kl: string }[];
   }
   interface CwIndex {
     sculpts: [string, string, string][];
@@ -231,6 +240,8 @@ import { withBase } from '../lib/catalog.js';
 
   let light: LightIndex | null = null;
   let cw: CwIndex | null = null;
+  // Lowercased colorway names, parallel to cw.colorways.
+  let cwNames: string[] | null = null;
   let lightLoading: Promise<void> | null = null;
   let cwLoading: Promise<void> | null = null;
   let lightFailed = false;
@@ -243,6 +254,8 @@ import { withBase } from '../lib/catalog.js';
         return r.json();
       })
       .then((j) => {
+        for (const m of j.makers) m.nl = m.n.toLowerCase();
+        for (const s of j.sculpts) s.kl = `${s.m} ${s.n}`.toLowerCase();
         light = j;
         lightFailed = false;
       })
@@ -259,6 +272,7 @@ import { withBase } from '../lib/catalog.js';
         return r.json();
       })
       .then((j) => {
+        cwNames = j.colorways.map((c: [number, string, string]) => c[1].toLowerCase());
         cw = j;
         cwFailed = false;
       })
@@ -269,9 +283,9 @@ import { withBase } from '../lib/catalog.js';
     return cwLoading;
   }
 
-  /** Rank: prefix on any word = 2, substring = 1, none = 0. */
-  function score(haystack: string, q: string): number {
-    const h = haystack.toLowerCase();
+  /** Rank: exact = 3, prefix on any word = 2, substring = 1, none = 0. Expects a lowercased haystack. */
+  function score(h: string, q: string): number {
+    if (h === q) return 3;
     const i = h.indexOf(q);
     if (i < 0) return 0;
     return i === 0 || h[i - 1] === ' ' ? 2 : 1;
@@ -281,44 +295,53 @@ import { withBase } from '../lib/catalog.js';
     return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
   }
 
+  function hidePanel() {
+    if (!panel) return;
+    panel.hidden = true;
+    input?.setAttribute('aria-expanded', 'false');
+    input?.removeAttribute('aria-activedescendant');
+  }
+
   function render(q: string) {
     if (!panel || !input) return;
     if (q.length < 2) {
-      panel.hidden = true;
+      hidePanel();
       panel.innerHTML = '';
       return;
     }
     const ql = q.toLowerCase();
     let html = '';
+    let opt = 0;
 
     if (light) {
       const makers = light.makers
-        .map((m) => ({ s: score(m.n, ql), m }))
+        .map((m) => ({ s: score(m.nl, ql), m }))
         .filter((x) => x.s > 0)
         .sort((a, b) => b.s - a.s)
         .slice(0, 5);
       const sculpts = light.sculpts
-        .map((s) => ({ s: score(`${s.m} ${s.n}`, ql), v: s }))
+        .map((s) => ({ s: score(s.kl, ql), v: s }))
         .filter((x) => x.s > 0)
         .sort((a, b) => b.s - a.s)
         .slice(0, 8);
       if (makers.length) {
-        html += '<div class="sr-group">Makers</div>';
+        html += '<div class="sr-group" role="presentation">Makers</div>';
         for (const { m } of makers)
-          html += `<a class="sr-row" href="${BASE}${m.u}">${esc(m.n)}</a>`;
+          html += `<a class="sr-row" role="option" id="sr-opt-${opt++}" href="${BASE}${m.u}">${esc(m.n)}</a>`;
       }
       if (sculpts.length) {
-        html += '<div class="sr-group">Sculpts</div>';
+        html += '<div class="sr-group" role="presentation">Sculpts</div>';
         for (const { v } of sculpts)
-          html += `<a class="sr-row" href="${BASE}${v.u}"><span>${esc(v.n)}</span><span class="sr-context">${esc(v.m)}</span></a>`;
+          html += `<a class="sr-row" role="option" id="sr-opt-${opt++}" href="${BASE}${v.u}"><span>${esc(v.n)}</span><span class="sr-context">${esc(v.m)}</span></a>`;
       }
     }
 
-    if (cw) {
+    if (cw && cwNames) {
       const hits: { s: number; name: string; ctx: string; href: string }[] = [];
-      for (const [si, name, id] of cw.colorways) {
-        const sc = score(name, ql);
+      for (let i = 0; i < cwNames.length; i++) {
+        const sc = score(cwNames[i], ql);
         if (sc > 0) {
+          const [si, name, id] = cw.colorways[i];
           const [sName, mName, url] = cw.sculpts[si];
           hits.push({
             s: sc,
@@ -326,31 +349,35 @@ import { withBase } from '../lib/catalog.js';
             ctx: `${mName} / ${sName}`,
             href: `${BASE}${url}#${id}`,
           });
-          if (hits.length > 400) break;
         }
       }
       hits.sort((a, b) => b.s - a.s);
       const top = hits.slice(0, 15);
       if (top.length) {
-        html += '<div class="sr-group">Colorways</div>';
+        html += '<div class="sr-group" role="presentation">Colorways</div>';
         for (const h of top)
-          html += `<a class="sr-row" href="${h.href}"><span>${esc(h.name)}</span><span class="sr-context">${esc(h.ctx)}</span></a>`;
+          html += `<a class="sr-row" role="option" id="sr-opt-${opt++}" href="${h.href}"><span>${esc(h.name)}</span><span class="sr-context">${esc(h.ctx)}</span></a>`;
       }
     } else if (cwLoading) {
-      html += '<div class="sr-note">Loading colorways…</div>';
+      html += '<div class="sr-note" role="status">Loading colorways…</div>';
     }
 
     if (!light && lightFailed) {
-      html = '<div class="sr-note">Search is unavailable. Check your connection and type again to retry.</div>';
+      html = '<div class="sr-note" role="status">Search is unavailable. Check your connection and type again to retry.</div>';
     } else if (!html) {
-      html = '<div class="sr-note">No matches in the archive.</div>';
+      html = '<div class="sr-note" role="status">No matches in the archive.</div>';
     }
     panel.innerHTML = html;
     panel.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    input.removeAttribute('aria-activedescendant');
   }
 
   let t: ReturnType<typeof setTimeout>;
-  input?.addEventListener('focus', () => loadLight());
+  input?.addEventListener('focus', () => {
+    loadLight();
+    loadCw(); // preload the heavy index so the download overlaps typing
+  });
   input?.addEventListener('input', () => {
     clearTimeout(t);
     t = setTimeout(async () => {
@@ -372,25 +399,46 @@ import { withBase } from '../lib/catalog.js';
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault();
       const next = e.key === 'ArrowDown' ? Math.min(cur + 1, rows.length - 1) : Math.max(cur - 1, 0);
-      rows.forEach((r) => r.removeAttribute('data-active'));
+      rows.forEach((r) => {
+        r.removeAttribute('data-active');
+        r.removeAttribute('aria-selected');
+      });
       rows[next].setAttribute('data-active', '');
+      rows[next].setAttribute('aria-selected', 'true');
+      input.setAttribute('aria-activedescendant', rows[next].id);
       rows[next].scrollIntoView({ block: 'nearest' });
     } else if (e.key === 'Enter' && cur >= 0) {
       e.preventDefault();
       rows[cur].click();
     } else if (e.key === 'Escape') {
-      panel.hidden = true;
+      hidePanel();
+    }
+  });
+
+  // Hide the panel when a result is clicked; the row's href may point at the
+  // current page, in which case no navigation would close it for us.
+  panel?.addEventListener('click', (e) => {
+    const row = (e.target as HTMLElement).closest<HTMLAnchorElement>('.sr-row');
+    if (!row) return;
+    hidePanel();
+    // Same-page hash link: Astro's router pushStates it without firing any
+    // event, so the target page's hash listener never runs. Handle it here
+    // and announce the change ourselves.
+    if (row.hash && row.pathname === location.pathname) {
+      e.preventDefault();
+      history.pushState(history.state, '', row.hash);
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
     }
   });
 
   document.addEventListener('click', (e) => {
     if (panel && !document.getElementById('ka-search')?.contains(e.target as Node)) {
-      panel.hidden = true;
+      hidePanel();
     }
   });
 
   // Close the results panel after a client-side navigation.
   document.addEventListener('astro:page-load', () => {
-    if (panel) panel.hidden = true;
+    hidePanel();
   });
 </script>
