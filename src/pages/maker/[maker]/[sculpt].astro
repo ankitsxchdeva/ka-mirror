@@ -14,10 +14,6 @@ export async function getStaticPaths() {
 
 const { maker, sculpt } = Astro.props;
 
-const attrs = [sculpt.profile, sculpt.design, sculpt.cast, sculpt.releaseDate]
-  .filter(Boolean)
-  .join(' / ');
-
 // Everything the lightbox needs, keyed by colorway id. Image URLs are
 // derived client-side from the id to keep large pages light.
 const lightboxData = Object.fromEntries(
@@ -41,76 +37,66 @@ const many = sculpt.colorways.length > 24;
 <Base
   title={`${sculpt.name} · ${maker.name}`}
   description={`${sculpt.name} by ${maker.name}: ${sculpt.colorways.length} artisan keycap colorways.`}
+  ogImage={sculpt.cover ? img.large(sculpt.cover.id) : undefined}
 >
   <nav class="crumbs" aria-label="Breadcrumb">
-    <a href={withBase('/')}>index</a>
+    <a href={withBase('/')}>Makers</a>
     <span aria-hidden="true">/</span>
-    <a href={withBase(maker.url)}>{maker.name.toLowerCase()}</a>
+    <a href={withBase(maker.url)}>{maker.name}</a>
     <span aria-hidden="true">/</span>
-    <span aria-current="page">{sculpt.name.toLowerCase()}</span>
+    <span aria-current="page">{sculpt.name}</span>
   </nav>
 
-  <div class="toolbar">
-    <div>
-      <h1 class="page-title">{sculpt.name}</h1>
-      <p class="mono-dim meta">
-        {sculpt.id} / {sculpt.colorways.length} colorway{sculpt.colorways.length === 1 ? '' : 's'}
-        {attrs ? ` / ${attrs}` : ''}
-      </p>
-    </div>
+  <div class="head-row">
+    <h1 class="page-title">{sculpt.name}</h1>
     {many && (
-      <input id="cw-filter" type="text" placeholder="filter colorways" aria-label="Filter colorways" />
+      <input id="cw-filter" type="text" placeholder="Filter colorways" aria-label="Filter colorways" />
     )}
   </div>
 
-  <div class="sheet" id="sheet">
+  <div class="grid">
     {
       sculpt.colorways.map((c) => (
-        <button
-          class="plate"
-          id={c.id}
-          data-cw={c.id}
-          data-name={(c.name || 'unnamed').toLowerCase()}
-          aria-label={`View ${c.name || 'unnamed colorway'}`}
-        >
-          <span class="plate-img">
-            <img
-              src={img.thumb(c.id)}
-              alt={c.name || 'Unnamed colorway'}
-              width="250"
-              height="250"
-              loading="lazy"
-              decoding="async"
-            />
-          </span>
-          <span class="plate-cap">
-            <span class="name">{c.name || 'Unnamed'}</span>
-            <span class="id">{c.id}{c.releaseDate ? ` / ${c.releaseDate}` : ''}</span>
-          </span>
-        </button>
+        <article class="card" id={c.id} data-name={(c.name || 'unnamed').toLowerCase()}>
+          <a class="cw-open" href={`#${c.id}`} data-cw={c.id} aria-label={`View ${c.name || 'unnamed colorway'}`}>
+            <span class="card-img">
+              <img
+                src={img.thumb(c.id)}
+                alt={c.name || 'Unnamed colorway'}
+                width="250"
+                height="250"
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+            <span class="card-body">
+              <span class="card-name">{c.name || 'Unnamed'}</span>
+              {c.releaseDate && <span class="card-sub">{c.releaseDate}</span>}
+            </span>
+          </a>
+        </article>
       ))
     }
   </div>
-  <p class="empty" id="no-match" hidden>no colorways match that filter</p>
+  <p class="empty" id="no-match" hidden>No colorways match that filter.</p>
 
   <dialog id="lightbox" aria-label="Colorway details">
     <div class="lb-frame">
       <img id="lb-img" alt="" />
     </div>
     <div class="lb-side">
-      <p class="microhead">{maker.name} / {sculpt.name}</p>
+      <p class="sub">{maker.name} / {sculpt.name}</p>
       <h2 id="lb-name"></h2>
-      <p class="mono-dim" id="lb-id"></p>
       <dl id="lb-meta"></dl>
       <div class="lb-actions">
-        <button id="lb-copy" class="data-link">copy link</button>
-        <a id="lb-full" class="data-link" target="_blank" rel="noopener">full image</a>
+        <button id="lb-copy" class="text-link">Copy link</button>
+        <a id="lb-full" class="text-link" target="_blank" rel="noopener">Full image</a>
       </div>
-      <div class="lb-nav mono-dim">
-        <button id="lb-prev" class="data-link" aria-label="Previous colorway">prev</button>
-        <button id="lb-next" class="data-link" aria-label="Next colorway">next</button>
-        <button id="lb-close" class="data-link" aria-label="Close">close</button>
-        <span class="lb-hint"><kbd>←</kbd> <kbd>→</kbd> <kbd>esc</kbd></span>
+      <div class="lb-nav">
+        <button id="lb-prev" class="text-link" aria-label="Previous colorway">Prev</button>
+        <button id="lb-next" class="text-link" aria-label="Next colorway">Next</button>
+        <button id="lb-close" class="text-link" aria-label="Close">Close</button>
+        <span class="lb-hint" aria-hidden="true"><kbd>←</kbd> <kbd>→</kbd> <kbd>esc</kbd></span>
       </div>
     </div>
   </dialog>
@@ -119,13 +105,15 @@ const many = sculpt.colorways.length > 24;
 </Base>
 
 <style>
-  .meta {
-    margin: 4px 0 0;
+  .cw-open {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
 
   dialog#lightbox {
     border: 1px solid var(--line-strong);
-    border-radius: 0;
+    border-radius: var(--radius);
     background: var(--bg-panel);
     color: var(--ink);
     padding: 0;
@@ -146,7 +134,6 @@ const many = sculpt.colorways.length > 24;
     display: grid;
     place-items: center;
     min-height: 300px;
-    border-right: 1px solid var(--line);
   }
   .lb-frame img {
     width: 100%;
@@ -165,34 +152,20 @@ const many = sculpt.colorways.length > 24;
     font-size: 1.0625rem;
     font-weight: 600;
     line-height: 1.25;
-    margin: 2px 0 0;
+    margin: 0;
   }
   .lb-side p {
     margin: 0;
   }
   #lb-meta {
-    margin: 10px 0 0;
+    margin: 8px 0 0;
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 3px 14px;
+    gap: 4px 14px;
     font-size: 0.8125rem;
-    border-top: 1px solid var(--line);
-    padding-top: 10px;
-  }
-  #lb-meta:empty {
-    border-top: none;
-    padding-top: 0;
-    margin: 0;
   }
   #lb-meta :global(dt) {
-    font-family: var(--mono);
-    font-size: 0.625rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--ink-dim);
-    align-self: baseline;
-    padding-top: 2px;
   }
   #lb-meta :global(dd) {
     margin: 0;
@@ -202,6 +175,7 @@ const many = sculpt.colorways.length > 24;
     display: flex;
     gap: 14px;
     margin-top: 12px;
+    font-size: 0.8125rem;
   }
   .lb-nav {
     margin-top: auto;
@@ -209,6 +183,7 @@ const many = sculpt.colorways.length > 24;
     display: flex;
     align-items: baseline;
     gap: 14px;
+    font-size: 0.8125rem;
   }
   .lb-hint {
     margin-left: auto;
@@ -219,10 +194,6 @@ const many = sculpt.colorways.length > 24;
     dialog#lightbox[open] {
       grid-template-columns: 1fr;
       overflow-y: auto;
-    }
-    .lb-frame {
-      border-right: none;
-      border-bottom: 1px solid var(--line);
     }
     .lb-frame img {
       max-height: 52dvh;
@@ -270,7 +241,6 @@ const many = sculpt.colorways.length > 24;
     };
     imgEl.alt = c.name;
     $('lb-name').textContent = c.name;
-    $('lb-id').textContent = id;
     ($('lb-full') as HTMLAnchorElement).href = full;
 
     const rows: [string, string][] = [];
@@ -302,16 +272,33 @@ const many = sculpt.colorways.length > 24;
     show(ids[(i + delta + ids.length) % ids.length]);
   }
 
-  document.querySelectorAll<HTMLButtonElement>('.plate').forEach((b) =>
-    b.addEventListener('click', () => show(b.dataset.cw!))
+  // Cards are anchor links so no-JS visitors still get a :target jump;
+  // with JS we intercept and open the lightbox instead.
+  document.querySelectorAll<HTMLAnchorElement>('.cw-open').forEach((a) =>
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      show(a.dataset.cw!);
+    })
   );
   $('lb-close').addEventListener('click', close);
   $('lb-prev').addEventListener('click', () => step(-1));
   $('lb-next').addEventListener('click', () => step(1));
   $('lb-copy').addEventListener('click', async () => {
-    await navigator.clipboard.writeText(location.href);
-    $('lb-copy').textContent = 'copied';
-    setTimeout(() => ($('lb-copy').textContent = 'copy link'), 1500);
+    const ok = await navigator.clipboard
+      .writeText(location.href)
+      .then(() => true)
+      .catch(() => {
+        // clipboard API can be unavailable (permissions, http); fall back
+        const ta = document.createElement('textarea');
+        ta.value = location.href;
+        document.body.appendChild(ta);
+        ta.select();
+        const done = document.execCommand('copy');
+        ta.remove();
+        return done;
+      });
+    $('lb-copy').textContent = ok ? 'Copied' : 'Copy failed';
+    setTimeout(() => ($('lb-copy').textContent = 'Copy link'), 1500);
   });
   dialog.addEventListener('click', (e) => {
     if (e.target === dialog) close();
@@ -322,25 +309,25 @@ const many = sculpt.colorways.length > 24;
   });
 
   // If a 250px thumb is missing on the CDN, fall back to the original image.
-  document.querySelectorAll<HTMLImageElement>('.plate-img img').forEach((el) => {
+  document.querySelectorAll<HTMLImageElement>('.card-img img').forEach((el) => {
     el.addEventListener(
       'error',
       () => {
-        const id = el.closest('.plate')?.id;
+        const id = el.closest('.card')?.id;
         if (id) el.src = `${CDN}/${id}.jpg`;
       },
       { once: true }
     );
   });
 
-  // Inline filter (rendered only for sheets over 24 plates).
+  // Inline filter (rendered only for galleries over 24 colorways).
   const filter = document.getElementById('cw-filter') as HTMLInputElement | null;
   if (filter) {
     const noMatch = document.getElementById('no-match')!;
     filter.addEventListener('input', () => {
       const q = filter.value.trim().toLowerCase();
       let any = false;
-      document.querySelectorAll<HTMLButtonElement>('.plate').forEach((p) => {
+      document.querySelectorAll<HTMLElement>('.card[data-name]').forEach((p) => {
         const hit = !q || p.dataset.name!.includes(q) || p.id.includes(q);
         p.hidden = !hit;
         if (hit) any = true;

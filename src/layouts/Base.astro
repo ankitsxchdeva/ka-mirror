@@ -3,12 +3,15 @@ import '@fontsource/ibm-plex-sans/400.css';
 import '@fontsource/ibm-plex-sans/500.css';
 import '@fontsource/ibm-plex-sans/600.css';
 import '@fontsource/ibm-plex-mono/400.css';
-import '@fontsource/ibm-plex-mono/500.css';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import { withBase } from '../lib/catalog.js';
 
-const { title, description = 'A community archive of artisan keycaps: makers, sculpts, and colorways, catalogued from the makers’ own docs.' } = Astro.props;
+const {
+  title,
+  description = 'A community archive of artisan keycaps: makers, sculpts, and colorways.',
+  ogImage,
+} = Astro.props;
 const fullTitle = title ? `${title} · Keycap Archivist Mirror` : 'Keycap Archivist Mirror';
 ---
 
@@ -18,11 +21,16 @@ const fullTitle = title ? `${title} · Keycap Archivist Mirror` : 'Keycap Archiv
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#1c1e24" />
     <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={new URL(Astro.url.pathname, Astro.site)} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    {ogImage && <meta name="twitter:card" content="summary_large_image" />}
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
     <script is:inline>
       // No-flash theme init: stored preference wins, else system preference.
       (() => {
@@ -36,17 +44,22 @@ const fullTitle = title ? `${title} · Keycap Archivist Mirror` : 'Keycap Archiv
   </head>
   <body>
     <Header />
+    <noscript>
+      <span class="noscript-note">
+        Browsing works without JavaScript; search and the image viewer need it.
+      </span>
+    </noscript>
     <main>
       <slot />
     </main>
     <footer>
-      <div class="foot-inner mono-dim">
+      <div class="foot-inner sub">
         <span>
           Read-only mirror of <a href="https://keycap-archivist.com">keycap-archivist.com</a>.
           Data belongs to the <a href="https://github.com/keycap-archivist/database">community database</a>
           and the makers.
         </span>
-        <a href={withBase('/about/')}>About this mirror</a>
+        <a href={withBase('/about/')}>About</a>
       </div>
     </footer>
   </body>
@@ -58,7 +71,7 @@ const fullTitle = title ? `${title} · Keycap Archivist Mirror` : 'Keycap Archiv
     padding: 14px var(--gutter);
   }
   .foot-inner {
-    max-width: 1200px;
+    max-width: 1240px;
     margin: 0 auto;
     display: flex;
     flex-wrap: wrap;

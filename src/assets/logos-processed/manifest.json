@@ -1,0 +1,938 @@
+{
+ "6829387": {
+  "chip": true,
+  "removed": 0.968
+ },
+ "16693384": {
+  "chip": true,
+  "removed": 0.704
+ },
+ "23634907": {
+  "chip": true,
+  "removed": 0.875
+ },
+ "40217679": {
+  "chip": true,
+  "removed": 0.646
+ },
+ "61895633": {
+  "chip": false,
+  "removed": 0.869
+ },
+ "81509270": {
+  "chip": true,
+  "removed": 0.883
+ },
+ "97279208": {
+  "chip": true,
+  "removed": 0.841
+ },
+ "07fd0f1b": {
+  "chip": false,
+  "removed": 0.688
+ },
+ "1091a0ac": {
+  "chip": true,
+  "removed": 0.96
+ },
+ "115bda7d": {
+  "chip": true,
+  "removed": 0.846
+ },
+ "120fb8f2": {
+  "chip": true,
+  "removed": 0.868
+ },
+ "12154e7b": {
+  "chip": true,
+  "removed": 0.493
+ },
+ "1544e340": {
+  "chip": true,
+  "removed": 0.956
+ },
+ "155af2e6": {
+  "chip": true,
+  "removed": 0.943
+ },
+ "15c2097d": {
+  "chip": true,
+  "removed": 0.813
+ },
+ "16df4385": {
+  "chip": false,
+  "removed": 0.558
+ },
+ "16fecba": {
+  "chip": true,
+  "removed": 0.827
+ },
+ "1bbabce6": {
+  "chip": false,
+  "removed": 0.923
+ },
+ "1be8013f": {
+  "chip": true,
+  "removed": 0.95
+ },
+ "1c160278": {
+  "chip": false,
+  "removed": 0
+ },
+ "1eb1d13a": {
+  "chip": true,
+  "removed": 0.882
+ },
+ "1fac6e72": {
+  "chip": false,
+  "removed": 0.587
+ },
+ "1ff2c383": {
+  "chip": false,
+  "removed": 0.489
+ },
+ "2230f9b3": {
+  "chip": false,
+  "removed": 0.355
+ },
+ "225e11c2": {
+  "chip": true,
+  "removed": 0.812
+ },
+ "257e3462": {
+  "chip": true,
+  "removed": 0.726
+ },
+ "260460a": {
+  "chip": true,
+  "removed": 0.558
+ },
+ "27710b61": {
+  "chip": false,
+  "removed": 0
+ },
+ "2842faca": {
+  "chip": false,
+  "removed": 0.764
+ },
+ "29a8f167": {
+  "chip": false,
+  "removed": 0.761
+ },
+ "2d7ffa7f": {
+  "chip": true,
+  "removed": 0.692
+ },
+ "2dc47fe3": {
+  "chip": false,
+  "removed": 0.687
+ },
+ "2f6b5457": {
+  "chip": false,
+  "removed": 0.545
+ },
+ "30f4e07c": {
+  "chip": true,
+  "removed": 0.607
+ },
+ "321c8f74": {
+  "chip": false,
+  "removed": 0.637
+ },
+ "321e47e3": {
+  "chip": true,
+  "removed": 0.755
+ },
+ "32a182c4": {
+  "chip": false,
+  "removed": 0.464
+ },
+ "34fb9c1f": {
+  "chip": true,
+  "removed": 0.927
+ },
+ "357a2610": {
+  "chip": true,
+  "removed": 0.834
+ },
+ "366c9651": {
+  "chip": false,
+  "removed": 0.911
+ },
+ "384b501d": {
+  "chip": false,
+  "removed": 0.695
+ },
+ "3a10499": {
+  "chip": true,
+  "removed": 0.898
+ },
+ "3a54b54a": {
+  "chip": false,
+  "removed": 0.837
+ },
+ "3b7e4de6": {
+  "chip": false,
+  "removed": 0.844
+ },
+ "3bc74ac3": {
+  "chip": false,
+  "removed": 0.714
+ },
+ "3c63e8bf": {
+  "chip": false,
+  "removed": 0.83
+ },
+ "3d066446": {
+  "chip": false,
+  "removed": 0.94
+ },
+ "3e9cabfa": {
+  "chip": false,
+  "removed": 0.431
+ },
+ "4154fc0f": {
+  "chip": false,
+  "removed": 0.52
+ },
+ "4183ab23": {
+  "chip": true,
+  "removed": 0.652
+ },
+ "42ba9d29": {
+  "chip": false,
+  "removed": 0
+ },
+ "45d1c689": {
+  "chip": false,
+  "removed": 0.633
+ },
+ "4a55e0be": {
+  "chip": false,
+  "removed": 0.696
+ },
+ "4d74b92e": {
+  "chip": true,
+  "removed": 0.751
+ },
+ "4e100c9e": {
+  "chip": true,
+  "removed": 0.865
+ },
+ "4e1aff89": {
+  "chip": false,
+  "removed": 0.851
+ },
+ "4e2dec37": {
+  "chip": true,
+  "removed": 0.784
+ },
+ "4e4eda29": {
+  "chip": true,
+  "removed": 0.745
+ },
+ "4f64080e": {
+  "chip": true,
+  "removed": 0.643
+ },
+ "4fa3abe3": {
+  "chip": true,
+  "removed": 0.805
+ },
+ "500aa195": {
+  "chip": true,
+  "removed": 0.565
+ },
+ "5137e37f": {
+  "chip": false,
+  "removed": 0.827
+ },
+ "52730e4a": {
+  "chip": true,
+  "removed": 0.963
+ },
+ "53252dbe": {
+  "chip": false,
+  "removed": 0.736
+ },
+ "5425e998": {
+  "chip": false,
+  "removed": 0.596
+ },
+ "54707c4b": {
+  "chip": true,
+  "removed": 0.919
+ },
+ "5499bd61": {
+  "chip": false,
+  "removed": 0.875
+ },
+ "55851cb5": {
+  "chip": false,
+  "removed": 0.947
+ },
+ "55b03b25": {
+  "chip": false,
+  "removed": 0.36
+ },
+ "594d1920": {
+  "chip": false,
+  "removed": 0
+ },
+ "610d23fa": {
+  "chip": true,
+  "removed": 0.917
+ },
+ "6175f0c7": {
+  "chip": true,
+  "removed": 0.63
+ },
+ "620fdd8": {
+  "chip": true,
+  "removed": 0.422
+ },
+ "62a4c768": {
+  "chip": false,
+  "removed": 0.919
+ },
+ "63243e40": {
+  "chip": false,
+  "removed": 0.805
+ },
+ "634ef7c": {
+  "chip": false,
+  "removed": 0.963
+ },
+ "6513dfae": {
+  "chip": false,
+  "removed": 0.487
+ },
+ "663df7c5": {
+  "chip": true,
+  "removed": 0.737
+ },
+ "67588eb5": {
+  "chip": false,
+  "removed": 0.448
+ },
+ "6848aaa0": {
+  "chip": true,
+  "removed": 0.541
+ },
+ "685c2588": {
+  "chip": true,
+  "removed": 0.573
+ },
+ "68870a31": {
+  "chip": true,
+  "removed": 0.844
+ },
+ "68cdf6dc": {
+  "chip": true,
+  "removed": 0.662
+ },
+ "690a1b90": {
+  "chip": false,
+  "removed": 0.018
+ },
+ "69a18319": {
+  "chip": true,
+  "removed": 0.944
+ },
+ "6b46c555": {
+  "chip": true,
+  "removed": 0.833
+ },
+ "6b6b943f": {
+  "chip": true,
+  "removed": 0.444
+ },
+ "6b8946c4": {
+  "chip": false,
+  "removed": 0.635
+ },
+ "6cae29b": {
+  "chip": true,
+  "removed": 0.912
+ },
+ "6d549465": {
+  "chip": true,
+  "removed": 0.801
+ },
+ "6d67664": {
+  "chip": true,
+  "removed": 0.92
+ },
+ "6efbabef": {
+  "chip": true,
+  "removed": 0.649
+ },
+ "6ff97cfa": {
+  "chip": false,
+  "removed": 0.917
+ },
+ "70a60bc4": {
+  "chip": false,
+  "removed": 0.831
+ },
+ "72ec7d70": {
+  "chip": false,
+  "removed": 0.739
+ },
+ "746e9d1": {
+  "chip": true,
+  "removed": 0.867
+ },
+ "785e721c": {
+  "chip": false,
+  "removed": 0.836
+ },
+ "7893764b": {
+  "chip": false,
+  "removed": 0.491
+ },
+ "79bfad4f": {
+  "chip": true,
+  "removed": 0.954
+ },
+ "7b28db24": {
+  "chip": true,
+  "removed": 0.954
+ },
+ "7be3ba68": {
+  "chip": true,
+  "removed": 0.745
+ },
+ "7e949449": {
+  "chip": false,
+  "removed": 0.658
+ },
+ "7f19c7d": {
+  "chip": true,
+  "removed": 0.688
+ },
+ "7fd0f1b": {
+  "chip": false,
+  "removed": 0.688
+ },
+ "801ea9d2": {
+  "chip": true,
+  "removed": 0.887
+ },
+ "814e90b": {
+  "chip": true,
+  "removed": 0.78
+ },
+ "82ad8553": {
+  "chip": true,
+  "removed": 0.895
+ },
+ "834a1ae7": {
+  "chip": false,
+  "removed": 0.152
+ },
+ "84748ce6": {
+  "chip": true,
+  "removed": 0.669
+ },
+ "84c0fb40": {
+  "chip": false,
+  "removed": 0.721
+ },
+ "84c8facf": {
+  "chip": false,
+  "removed": 0.862
+ },
+ "85b28a01": {
+  "chip": false,
+  "removed": 0.845
+ },
+ "865deb34": {
+  "chip": true,
+  "removed": 0.863
+ },
+ "869ac01f": {
+  "chip": false,
+  "removed": 0.571
+ },
+ "87e8613c": {
+  "chip": false,
+  "removed": 0.522
+ },
+ "8874564c": {
+  "chip": false,
+  "removed": 0.582
+ },
+ "8a2782a7": {
+  "chip": false,
+  "removed": 0.738
+ },
+ "8ac373e3": {
+  "chip": false,
+  "removed": 0.689
+ },
+ "8acfdb32": {
+  "chip": false,
+  "removed": 0.627
+ },
+ "8b68584c": {
+  "chip": false,
+  "removed": 0.914
+ },
+ "8c954f4": {
+  "chip": false,
+  "removed": 0.49
+ },
+ "8cae7fe0": {
+  "chip": false,
+  "removed": 0.386
+ },
+ "8cb07a8b": {
+  "chip": false,
+  "removed": 0.549
+ },
+ "8d20284c": {
+  "chip": true,
+  "removed": 0.872
+ },
+ "8dac3435": {
+  "chip": true,
+  "removed": 0.825
+ },
+ "8e113e35": {
+  "chip": false,
+  "removed": 0
+ },
+ "8fd82fa5": {
+  "chip": true,
+  "removed": 0.791
+ },
+ "8ffca07f": {
+  "chip": false,
+  "removed": 0.576
+ },
+ "944a9285": {
+  "chip": true,
+  "removed": 0.937
+ },
+ "958ea08d": {
+  "chip": true,
+  "removed": 0.94
+ },
+ "95f25c5d": {
+  "chip": true,
+  "removed": 0.518
+ },
+ "96f4242c": {
+  "chip": true,
+  "removed": 0.832
+ },
+ "980bdc64": {
+  "chip": true,
+  "removed": 0.803
+ },
+ "985ff9d3": {
+  "chip": false,
+  "removed": 0.881
+ },
+ "9adb7126": {
+  "chip": false,
+  "removed": 0.594
+ },
+ "9b2f6077": {
+  "chip": true,
+  "removed": 0.884
+ },
+ "9e85468d": {
+  "chip": true,
+  "removed": 0.818
+ },
+ "a00953bd": {
+  "chip": true,
+  "removed": 0.744
+ },
+ "a205ce0a": {
+  "chip": false,
+  "removed": 0.747
+ },
+ "a31490c1": {
+  "chip": false,
+  "removed": 0.86
+ },
+ "a3bffc04": {
+  "chip": true,
+  "removed": 0.883
+ },
+ "a738fd7e": {
+  "chip": false,
+  "removed": 0.459
+ },
+ "a73f210e": {
+  "chip": false,
+  "removed": 0.5
+ },
+ "a8ab97a4": {
+  "chip": true,
+  "removed": 0.943
+ },
+ "a8d34c5e": {
+  "chip": true,
+  "removed": 0.682
+ },
+ "a9328677": {
+  "chip": false,
+  "removed": 0.863
+ },
+ "a95d149d": {
+  "chip": false,
+  "removed": 0.638
+ },
+ "ab1d3b22": {
+  "chip": false,
+  "removed": 0.959
+ },
+ "acb6ee36": {
+  "chip": true,
+  "removed": 0.613
+ },
+ "acfac611": {
+  "chip": false,
+  "removed": 0.594
+ },
+ "ada5e593": {
+  "chip": false,
+  "removed": 0.774
+ },
+ "af8591c1": {
+  "chip": true,
+  "removed": 0.836
+ },
+ "b05d0831": {
+  "chip": true,
+  "removed": 0.92
+ },
+ "b1832521": {
+  "chip": false,
+  "removed": 0.571
+ },
+ "b2618556": {
+  "chip": false,
+  "removed": 0.791
+ },
+ "b41b1348": {
+  "chip": false,
+  "removed": 0.531
+ },
+ "b4406760": {
+  "chip": false,
+  "removed": 0.648
+ },
+ "b53ce2ec": {
+  "chip": true,
+  "removed": 0.872
+ },
+ "b6cb880b": {
+  "chip": true,
+  "removed": 0.859
+ },
+ "b71e0cd0": {
+  "chip": false,
+  "removed": 0.734
+ },
+ "ba4abd": {
+  "chip": false,
+  "removed": 0.92
+ },
+ "bac9503f": {
+  "chip": false,
+  "removed": 0.478
+ },
+ "bbe3a14a": {
+  "chip": true,
+  "removed": 0.887
+ },
+ "bced6bca": {
+  "chip": true,
+  "removed": 0.847
+ },
+ "bf97de89": {
+  "chip": false,
+  "removed": 0.936
+ },
+ "c02bf061": {
+  "chip": true,
+  "removed": 0.741
+ },
+ "c0c1d398": {
+  "chip": true,
+  "removed": 0.717
+ },
+ "c0c9ffa9": {
+  "chip": true,
+  "removed": 0.961
+ },
+ "c14e96a7": {
+  "chip": true,
+  "removed": 0.931
+ },
+ "c187ca72": {
+  "chip": true,
+  "removed": 0.723
+ },
+ "c44d43cd": {
+  "chip": true,
+  "removed": 0.732
+ },
+ "c4b98276": {
+  "chip": false,
+  "removed": 0
+ },
+ "c51ef9b": {
+  "chip": false,
+  "removed": 0.661
+ },
+ "c6e4a02a": {
+  "chip": true,
+  "removed": 0.701
+ },
+ "cc91fabb": {
+  "chip": true,
+  "removed": 0.891
+ },
+ "cdd91103": {
+  "chip": true,
+  "removed": 0.787
+ },
+ "ce8a8e22": {
+  "chip": true,
+  "removed": 0.442
+ },
+ "cef53f28": {
+  "chip": false,
+  "removed": 0.583
+ },
+ "d0cb9c83": {
+  "chip": false,
+  "removed": 0.645
+ },
+ "d1df0782": {
+  "chip": true,
+  "removed": 0.855
+ },
+ "d2df83d9": {
+  "chip": true,
+  "removed": 0.937
+ },
+ "d3fe003d": {
+  "chip": false,
+  "removed": 0.52
+ },
+ "d518e1b0": {
+  "chip": true,
+  "removed": 0.783
+ },
+ "d6c0d49e": {
+  "chip": true,
+  "removed": 0.958
+ },
+ "d84851f7": {
+  "chip": false,
+  "removed": 0.655
+ },
+ "d9ecb1c0": {
+  "chip": false,
+  "removed": 0.721
+ },
+ "da43467e": {
+  "chip": false,
+  "removed": 0.538
+ },
+ "db87932a": {
+  "chip": false,
+  "removed": 0
+ },
+ "dbe4fb1f": {
+  "chip": false,
+  "removed": 0.407
+ },
+ "dbf82e90": {
+  "chip": true,
+  "removed": 0.637
+ },
+ "dc6c280a": {
+  "chip": false,
+  "removed": 0.704
+ },
+ "dc9c4003": {
+  "chip": false,
+  "removed": 0.815
+ },
+ "dccd2a5": {
+  "chip": true,
+  "removed": 0.908
+ },
+ "dd852aca": {
+  "chip": false,
+  "removed": 0.492
+ },
+ "ddaf1f8c": {
+  "chip": true,
+  "removed": 0.692
+ },
+ "de28aff1": {
+  "chip": false,
+  "removed": 0.798
+ },
+ "de6ddfab": {
+  "chip": false,
+  "removed": 0.729
+ },
+ "df1a1521": {
+  "chip": true,
+  "removed": 0.912
+ },
+ "df46082a": {
+  "chip": true,
+  "removed": 0.713
+ },
+ "e035ee16": {
+  "chip": false,
+  "removed": 0.806
+ },
+ "e0a04a0c": {
+  "chip": true,
+  "removed": 0.763
+ },
+ "e14f5f5a": {
+  "chip": false,
+  "removed": 0
+ },
+ "e2285960": {
+  "chip": true,
+  "removed": 0.568
+ },
+ "e2792284": {
+  "chip": true,
+  "removed": 0.837
+ },
+ "e4eb5c37": {
+  "chip": false,
+  "removed": 0.52
+ },
+ "e57c41a": {
+  "chip": false,
+  "removed": 0.456
+ },
+ "e5c2ba18": {
+  "chip": true,
+  "removed": 0.584
+ },
+ "e8915432": {
+  "chip": true,
+  "removed": 0.754
+ },
+ "ea0b31fa": {
+  "chip": true,
+  "removed": 0.694
+ },
+ "eb93541f": {
+  "chip": true,
+  "removed": 0.809
+ },
+ "edb9aff4": {
+  "chip": false,
+  "removed": 0.676
+ },
+ "ede9ca7c": {
+  "chip": false,
+  "removed": 0.86
+ },
+ "efe02066": {
+  "chip": true,
+  "removed": 0.956
+ },
+ "f086fafc": {
+  "chip": false,
+  "removed": 0.78
+ },
+ "f2a7d69d": {
+  "chip": true,
+  "removed": 0.831
+ },
+ "f31e833c": {
+  "chip": false,
+  "removed": 0
+ },
+ "f3c6b75f": {
+  "chip": false,
+  "removed": 0.567
+ },
+ "f3efa727": {
+  "chip": false,
+  "removed": 0.645
+ },
+ "f4340f3e": {
+  "chip": false,
+  "removed": 0.574
+ },
+ "f52fa070": {
+  "chip": false,
+  "removed": 0.86
+ },
+ "f74b1fa4": {
+  "chip": false,
+  "removed": 0.817
+ },
+ "f79138dd": {
+  "chip": true,
+  "removed": 0.93
+ },
+ "f8c855a4": {
+  "chip": false,
+  "removed": 0.792
+ },
+ "f8deaa65": {
+  "chip": true,
+  "removed": 0.841
+ },
+ "fa0bf049": {
+  "chip": false,
+  "removed": 0.952
+ },
+ "fb0800a2": {
+  "chip": true,
+  "removed": 0.882
+ },
+ "fbd9e173": {
+  "chip": false,
+  "removed": 0.326
+ },
+ "fd91c007": {
+  "chip": true,
+  "removed": 0.82
+ },
+ "fee4aab": {
+  "chip": true,
+  "removed": 0.832
+ },
+ "ff33c7c3": {
+  "chip": false,
+  "removed": 0.856
+ },
+ "ff5fc103": {
+  "chip": true,
+  "removed": 0.531
+ },
+ "ff8ad9cd": {
+  "chip": false,
+  "removed": 0.737
+ },
+ "ff972406": {
+  "chip": true,
+  "removed": 0.947
+ },
+ "nologo": {
+  "chip": false,
+  "removed": 0.769
+ }
+}

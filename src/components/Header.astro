@@ -7,14 +7,14 @@ import { withBase } from '../lib/catalog.js';
     <a class="wordmark" href={withBase('/')}>
       <span class="mark" aria-hidden="true">KA</span>
       <span class="name">Keycap Archivist</span>
-      <span class="sub">mirror</span>
+      <span class="tag">mirror</span>
     </a>
 
     <div class="search" id="ka-search">
       <input
         id="ka-search-input"
         type="search"
-        placeholder="search makers, sculpts, colorways"
+        placeholder="Search makers, sculpts, colorways"
         autocomplete="off"
         spellcheck="false"
         aria-label="Search the archive"
@@ -59,55 +59,52 @@ import { withBase } from '../lib/catalog.js';
     border-bottom: 1px solid var(--line);
   }
   .head-inner {
-    max-width: 1200px;
+    max-width: 1240px;
     margin: 0 auto;
     padding: 0 var(--gutter);
-    height: 52px;
+    height: 54px;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
   }
   .wordmark {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 8px;
     white-space: nowrap;
   }
   .mark {
-    font-family: var(--mono);
-    font-weight: 500;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
     color: var(--bg);
     background: var(--ink);
     padding: 2px 5px;
-    letter-spacing: 0.05em;
+    border-radius: 5px;
   }
   .name {
     font-weight: 600;
     font-size: 0.875rem;
     letter-spacing: -0.01em;
   }
-  .sub {
-    font-family: var(--mono);
-    font-size: 0.625rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+  .tag {
+    font-size: 0.6875rem;
     color: var(--ink-dim);
   }
   .search {
     position: relative;
     flex: 1;
-    max-width: 460px;
+    max-width: 440px;
     margin-left: auto;
   }
   .search input {
     width: 100%;
-    font-size: 0.8125rem;
-    padding: 6px 34px 6px 10px;
+    padding-right: 34px;
+    border-radius: 999px;
   }
   .hint {
     position: absolute;
-    right: 8px;
+    right: 10px;
     top: 50%;
     translate: 0 -50%;
     pointer-events: none;
@@ -124,6 +121,8 @@ import { withBase } from '../lib/catalog.js';
     overflow-y: auto;
     background: var(--bg-panel);
     border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    box-shadow: 0 12px 32px oklch(0.05 0 0 / 0.35);
   }
   .icon-btn {
     color: var(--ink-dim);
@@ -142,6 +141,9 @@ import { withBase } from '../lib/catalog.js';
       padding-top: 8px;
       padding-bottom: 8px;
     }
+    .name {
+      display: none;
+    }
     .search {
       order: 3;
       flex-basis: 100%;
@@ -154,37 +156,29 @@ import { withBase } from '../lib/catalog.js';
 </style>
 
 <style is:global>
-  /* Search result rows are injected by script, so style them globally. */
   .search-panel .sr-group {
-    font-family: var(--mono);
-    font-size: 0.625rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
+    font-size: 0.6875rem;
+    font-weight: 600;
     text-transform: uppercase;
+    letter-spacing: 0.06em;
     color: var(--ink-dim);
-    padding: 10px 10px 4px;
-    border-bottom: 1px solid var(--line);
+    padding: 10px 12px 4px;
   }
   .search-panel .sr-row {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     gap: 10px;
-    padding: 7px 10px;
+    padding: 7px 12px;
     font-size: 0.8125rem;
-    border-bottom: 1px solid var(--line);
     transition: background-color var(--t);
-  }
-  .search-panel .sr-row:last-child {
-    border-bottom: none;
   }
   .search-panel .sr-row[data-active],
   .search-panel .sr-row:hover {
     background: var(--bg-hover);
   }
   .search-panel .sr-context {
-    font-family: var(--mono);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     color: var(--ink-dim);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -192,9 +186,8 @@ import { withBase } from '../lib/catalog.js';
     flex-shrink: 1;
   }
   .search-panel .sr-note {
-    padding: 10px;
-    font-family: var(--mono);
-    font-size: 0.6875rem;
+    padding: 12px;
+    font-size: 0.8125rem;
     color: var(--ink-dim);
   }
 </style>
@@ -231,7 +224,6 @@ import { withBase } from '../lib/catalog.js';
     makers: { n: string; u: string }[];
     sculpts: { n: string; m: string; u: string }[];
   }
-  // colorways.json: { sculpts: [name, makerName, url][], colorways: [sculptIdx, name, id][] }
   interface CwIndex {
     sculpts: [string, string, string][];
     colorways: [number, string, string][];
@@ -241,23 +233,39 @@ import { withBase } from '../lib/catalog.js';
   let cw: CwIndex | null = null;
   let lightLoading: Promise<void> | null = null;
   let cwLoading: Promise<void> | null = null;
+  let lightFailed = false;
+  let cwFailed = false;
 
   function loadLight() {
     lightLoading ??= fetch(`${BASE}/search-index.json`)
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(String(r.status));
+        return r.json();
+      })
       .then((j) => {
         light = j;
+        lightFailed = false;
       })
-      .catch(() => {});
+      .catch(() => {
+        lightFailed = true;
+        lightLoading = null; // allow retry on next keystroke
+      });
     return lightLoading;
   }
   function loadCw() {
     cwLoading ??= fetch(`${BASE}/search-colorways.json`)
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(String(r.status));
+        return r.json();
+      })
       .then((j) => {
         cw = j;
+        cwFailed = false;
       })
-      .catch(() => {});
+      .catch(() => {
+        cwFailed = true;
+        cwLoading = null;
+      });
     return cwLoading;
   }
 
@@ -329,10 +337,15 @@ import { withBase } from '../lib/catalog.js';
           html += `<a class="sr-row" href="${h.href}"><span>${esc(h.name)}</span><span class="sr-context">${esc(h.ctx)}</span></a>`;
       }
     } else if (cwLoading) {
-      html += '<div class="sr-note">loading colorway index</div>';
+      html += '<div class="sr-note">Loading colorways…</div>';
     }
 
-    panel.innerHTML = html || '<div class="sr-note">no matches in the archive</div>';
+    if (!light && lightFailed) {
+      html = '<div class="sr-note">Search is unavailable. Check your connection and type again to retry.</div>';
+    } else if (!html) {
+      html = '<div class="sr-note">No matches in the archive.</div>';
+    }
+    panel.innerHTML = html;
     panel.hidden = false;
   }
 
@@ -344,7 +357,6 @@ import { withBase } from '../lib/catalog.js';
       const q = input.value.trim();
       if (q.length >= 2) {
         await loadLight();
-        // kick off colorway load; re-render when it lands
         loadCw().then(() => render(input.value.trim()));
       }
       render(q);

@@ -5,11 +5,11 @@ import { withBase } from '../lib/catalog.js';
 
 <Base title="Not found">
   <div class="prose nf">
-    <p class="microhead">404 / not in the registry</p>
-    <h1 class="page-title">This cap isn&rsquo;t catalogued here.</h1>
+    <p class="sub">404</p>
+    <h1 class="page-title">This page isn&rsquo;t in the archive.</h1>
     <p>
-      The page may have moved when the catalog was resynced.
-      <a href={withBase('/')}>Browse the index</a> or press <kbd>/</kbd> to search.
+      It may have moved when the catalog was resynced.
+      <a href={withBase('/')}>Browse the makers</a> or press <kbd>/</kbd> to search.
     </p>
   </div>
 </Base>
@@ -18,7 +18,7 @@ import { withBase } from '../lib/catalog.js';
   .nf {
     padding: 48px 0;
   }
-  .nf .microhead {
-    margin: 0 0 10px;
+  .nf .sub {
+    margin: 0 0 6px;
   }
 </style>
