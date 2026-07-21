@@ -12,6 +12,15 @@ export default defineConfig({
   base,
   trailingSlash: 'ignore',
   integrations: [sitemap()],
+  // Hover-prefetch every internal link; in Chromium, prerender it via the
+  // Speculation Rules API (falls back to plain prefetch elsewhere).
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'hover',
+  },
+  experimental: {
+    clientPrerender: true,
+  },
   build: {
     inlineStylesheets: 'auto',
   },

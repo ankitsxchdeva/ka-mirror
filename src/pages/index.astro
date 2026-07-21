@@ -62,8 +62,9 @@ const logos = Object.fromEntries(
 
 <script>
   // Pinned makers (localStorage): pinned cards move to the front of the grid.
+  // Re-runs on every client-side navigation (astro:page-load), so all state
+  // is derived from the current DOM inside init().
   const KEY = 'ka-pinned-makers';
-  const grid = document.getElementById('maker-grid');
   const read = (): string[] => {
     try {
       return JSON.parse(localStorage.getItem(KEY) ?? '[]');
@@ -72,30 +73,37 @@ const logos = Object.fromEntries(
     }
   };
 
-  const original = grid ? [...grid.children] : [];
+  function init() {
+    const grid = document.getElementById('maker-grid');
+    if (!grid || grid.dataset.bound) return;
+    grid.dataset.bound = '1';
 
-  function apply(pinned: string[]) {
-    if (!grid) return;
-    // restore original order, then move pinned to front in pin order
-    original.forEach((c) => grid.appendChild(c));
-    for (const id of [...pinned].reverse()) {
-      const card = grid.querySelector(`[data-maker-id="${id}"]`);
-      if (card) grid.prepend(card);
+    const original = [...grid.children];
+
+    function apply(pinned: string[]) {
+      original.forEach((c) => grid!.appendChild(c));
+      for (const id of [...pinned].reverse()) {
+        const card = grid!.querySelector(`[data-maker-id="${id}"]`);
+        if (card) grid!.prepend(card);
+      }
+      grid!.querySelectorAll<HTMLButtonElement>('[data-star]').forEach((b) => {
+        b.setAttribute('aria-pressed', String(pinned.includes(b.dataset.star!)));
+      });
     }
-    grid.querySelectorAll<HTMLButtonElement>('[data-star]').forEach((b) => {
-      b.setAttribute('aria-pressed', String(pinned.includes(b.dataset.star!)));
+
+    apply(read());
+
+    grid.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-star]');
+      if (!btn) return;
+      const id = btn.dataset.star!;
+      let pinned = read();
+      pinned = pinned.includes(id) ? pinned.filter((x) => x !== id) : [...pinned, id];
+      localStorage.setItem(KEY, JSON.stringify(pinned));
+      apply(pinned);
     });
   }
 
-  apply(read());
-
-  grid?.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-star]');
-    if (!btn) return;
-    const id = btn.dataset.star!;
-    let pinned = read();
-    pinned = pinned.includes(id) ? pinned.filter((x) => x !== id) : [...pinned, id];
-    localStorage.setItem(KEY, JSON.stringify(pinned));
-    apply(pinned);
-  });
+  init();
+  document.addEventListener('astro:page-load', init);
 </script>

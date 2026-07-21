@@ -205,7 +205,19 @@ const many = sculpt.colorways.length > 24;
 </style>
 
 <script>
+  // Re-runs on every client-side navigation (astro:page-load); all state and
+  // element refs are scoped inside init() against the current DOM.
   const CDN = 'https://cdn.keycap-archivist.com/keycaps';
+
+  function esc(s: string): string {
+    return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+  }
+
+  function init() {
+  const dialog = document.getElementById('lightbox') as HTMLDialogElement | null;
+  if (!dialog || dialog.dataset.bound) return;
+  dialog.dataset.bound = '1';
+
   const data = JSON.parse(document.getElementById('cw-data')!.textContent!) as Record<
     string,
     {
@@ -220,13 +232,8 @@ const many = sculpt.colorways.length > 24;
     }
   >;
   const ids = Object.keys(data);
-  const dialog = document.getElementById('lightbox') as HTMLDialogElement;
   const $ = (id: string) => document.getElementById(id)!;
   let current = '';
-
-  function esc(s: string): string {
-    return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
-  }
 
   function show(id: string) {
     const c = data[id];
@@ -257,6 +264,12 @@ const many = sculpt.colorways.length > 24;
 
     history.replaceState(null, '', `#${id}`);
     if (!dialog.open) dialog.showModal();
+
+    // warm the neighbors so prev/next feel instant
+    const i = ids.indexOf(id);
+    for (const n of [ids[i + 1], ids[i - 1]]) {
+      if (n) new Image().src = `${CDN}/720/${n}.jpg`;
+    }
   }
 
   function close() {
@@ -342,4 +355,8 @@ const many = sculpt.colorways.length > 24;
     document.getElementById(hash)?.scrollIntoView({ block: 'center' });
     show(hash);
   }
+  }
+
+  init();
+  document.addEventListener('astro:page-load', init);
 </script>

@@ -2,7 +2,7 @@
 import { withBase } from '../lib/catalog.js';
 ---
 
-<header>
+<header transition:persist="ka-header">
   <div class="head-inner">
     <a class="wordmark" href={withBase('/')}>
       <span class="mark" aria-hidden="true">KA</span>
@@ -387,5 +387,10 @@ import { withBase } from '../lib/catalog.js';
     if (panel && !document.getElementById('ka-search')?.contains(e.target as Node)) {
       panel.hidden = true;
     }
+  });
+
+  // Close the results panel after a client-side navigation.
+  document.addEventListener('astro:page-load', () => {
+    if (panel) panel.hidden = true;
   });
 </script>
