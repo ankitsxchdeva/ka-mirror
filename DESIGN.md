@@ -34,9 +34,10 @@ minmax 150-180px columns. Page gutter clamp(16px, 3vw, 32px), max-width
 
 ## Components
 
-- Maker card: square logo on a uniform medium-grey tile (--tile, same in
-  both themes; empty tile when the maker has no logo), name, muted count
-  line.
+- Maker card: the published logo as-is on its white ground; dark mode dims
+  the whole tile (filter: brightness .85) so white doesn't glare. Makers
+  without a logo get the same tile with a circle-backslash SVG mark. Name,
+  muted count line. No footer, no about page: header, grids, lightbox only.
 - Sculpt card: square cover photo, name, colorway count.
 - Colorway card: square photo, name, muted id; anchor link that opens the
   lightbox (falls back to :target jump without JS).

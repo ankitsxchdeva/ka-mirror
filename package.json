@@ -8,8 +8,7 @@
     "fetch-data": "node scripts/fetch-data.mjs",
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
-    "process-logos": "node scripts/process-logos.mjs"
+    "preview": "astro preview"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",

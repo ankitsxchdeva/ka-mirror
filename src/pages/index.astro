@@ -5,14 +5,14 @@ import { getCatalog, withBase } from '../lib/catalog.js';
 
 const { makers } = await getCatalog();
 
-// Background-removed maker logos (scripts/process-logos.mjs), keyed by id,
-// rendered on a uniform medium-grey tile.
-const logoModules = import.meta.glob('../assets/logos-processed/*.png', {
+// Maker logos as published (white backgrounds), keyed by id. Dark mode dims
+// the tile slightly so the white ground reads as a soft grey.
+const logoModules = import.meta.glob('../assets/logos/*.{jpg,png}', {
   eager: true,
 });
 const logos = Object.fromEntries(
   Object.entries(logoModules).map(([p, mod]) => [
-    p.split('/').pop().replace('.png', ''),
+    p.split('/').pop().replace(/\.(jpg|png)$/, ''),
     mod.default,
   ])
 );

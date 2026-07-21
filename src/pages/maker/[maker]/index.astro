@@ -13,7 +13,7 @@ export async function getStaticPaths() {
 
 const { maker } = Astro.props;
 
-const logoModules = import.meta.glob('../../../assets/logos-processed/*.png', {
+const logoModules = import.meta.glob('../../../assets/logos/*.{jpg,png}', {
   eager: true,
 });
 const logo = Object.entries(logoModules).find(([p]) =>
@@ -95,18 +95,21 @@ const links = [
   .logo-box {
     width: 56px;
     height: 56px;
-    padding: 6px;
     border: 1px solid var(--line);
     border-radius: var(--radius);
-    background: var(--tile);
+    background: oklch(0.97 0.002 90);
     flex-shrink: 0;
     display: grid;
     place-items: center;
+    overflow: hidden;
+  }
+  :global(:root:not([data-theme='light'])) .logo-box {
+    filter: brightness(0.85);
   }
   .logo-box :global(img) {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
   }
   .links {
     margin: 4px 0 0;
