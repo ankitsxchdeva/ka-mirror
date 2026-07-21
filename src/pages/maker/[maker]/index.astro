@@ -2,7 +2,6 @@
 import Base from '../../../layouts/Base.astro';
 import { Image } from 'astro:assets';
 import { getCatalog, withBase, img } from '../../../lib/catalog.js';
-import logoManifest from '../../../assets/logos-processed/manifest.json';
 
 export async function getStaticPaths() {
   const { makers } = await getCatalog();
@@ -41,7 +40,7 @@ const links = [
 
   <div class="maker-head">
     {logo && (
-      <span class:list={['logo-box', logoManifest[maker.id]?.chip && 'chip']}>
+      <span class="logo-box">
         <Image src={logo} alt="" width={112} height={112} />
       </span>
     )}
@@ -99,13 +98,10 @@ const links = [
     padding: 6px;
     border: 1px solid var(--line);
     border-radius: var(--radius);
-    background: var(--bg-panel);
+    background: var(--tile);
     flex-shrink: 0;
     display: grid;
     place-items: center;
-  }
-  .logo-box.chip {
-    background: var(--chip);
   }
   .logo-box :global(img) {
     width: 100%;

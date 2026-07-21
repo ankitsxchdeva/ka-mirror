@@ -1,13 +1,12 @@
 ---
 import Base from '../layouts/Base.astro';
 import { Image } from 'astro:assets';
-import { getCatalog, withBase, img } from '../lib/catalog.js';
-import logoManifest from '../assets/logos-processed/manifest.json';
+import { getCatalog, withBase } from '../lib/catalog.js';
 
 const { makers } = await getCatalog();
 
-// Background-removed maker logos (scripts/process-logos.mjs), keyed by id.
-// Dark-ink logos are flagged `chip` and rendered on a light tile.
+// Background-removed maker logos (scripts/process-logos.mjs), keyed by id,
+// rendered on a uniform medium-grey tile.
 const logoModules = import.meta.glob('../assets/logos-processed/*.png', {
   eager: true,
 });
@@ -25,13 +24,9 @@ const logos = Object.fromEntries(
     {
       makers.map((m) => (
         <article class="card" data-maker-id={m.id}>
-          <div class:list={['card-img', logos[m.id] && 'logo-tile', logoManifest[m.id]?.chip && 'chip']}>
-            {logos[m.id] ? (
+          <div class="card-img logo-tile">
+            {logos[m.id] && (
               <Image src={logos[m.id]} alt="" width={240} height={240} loading="lazy" />
-            ) : m.cover ? (
-              <img src={img.thumb(m.cover.id)} alt="" width="240" height="240" loading="lazy" decoding="async" />
-            ) : (
-              <div />
             )}
           </div>
           <div class="card-body">
