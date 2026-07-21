@@ -11,6 +11,28 @@
  */
 const CARD_LINKS = '.grid a.cover-link, .grid a.cw-open';
 
+// ---- floating shortcuts help (bottom right) --------------------------------
+function helpPanel() {
+  return document.getElementById('kb-help-panel');
+}
+
+function setHelpOpen(open) {
+  const panel = helpPanel();
+  const btn = document.getElementById('kb-help-btn');
+  if (!panel || !btn) return;
+  panel.hidden = !open;
+  btn.setAttribute('aria-expanded', String(open));
+}
+
+document.addEventListener('click', (e) => {
+  const inHelp = e.target instanceof Element && e.target.closest('.kb-help');
+  if (inHelp && e.target.closest('#kb-help-btn')) {
+    setHelpOpen(helpPanel()?.hidden ?? false);
+  } else if (!inHelp) {
+    setHelpOpen(false);
+  }
+});
+
 function gridLinks(grid) {
   return [...grid.querySelectorAll('a.cover-link, a.cw-open')].filter(
     (a) => !a.closest('[hidden]')
@@ -23,6 +45,20 @@ function columnsOf(grid) {
 
 document.addEventListener('keydown', (e) => {
   const active = document.activeElement;
+  const typing =
+    active instanceof HTMLElement &&
+    (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
+
+  // "?" toggles the shortcuts help; Escape closes it.
+  if (e.key === '?' && !typing) {
+    e.preventDefault();
+    setHelpOpen(helpPanel()?.hidden ?? false);
+    return;
+  }
+  if (e.key === 'Escape' && helpPanel() && !helpPanel().hidden) {
+    setHelpOpen(false);
+    return;
+  }
 
   // Escape clears the colorway filter (then keeps focus for retyping).
   if (e.key === 'Escape' && active instanceof HTMLInputElement && active.id === 'cw-filter') {

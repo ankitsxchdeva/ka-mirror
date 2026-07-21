@@ -226,7 +226,7 @@ a.text-link:hover {
 }
 
 :root:not([data-theme='light']) .logo-tile {
-  filter: brightness(0.85);
+  filter: brightness(0.75);
 }
 
 .card-body {

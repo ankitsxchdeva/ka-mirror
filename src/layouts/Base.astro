@@ -51,6 +51,28 @@ const fullTitle = title ? `${title} · Keycap Archivist Mirror` : 'Keycap Archiv
     <main id="main" tabindex="-1">
       <slot />
     </main>
+
+    <div class="kb-help">
+      <div class="kb-help-panel" id="kb-help-panel" role="dialog" aria-label="Keyboard shortcuts" hidden>
+        <p class="kb-help-title">Keyboard shortcuts</p>
+        <dl>
+          <dt><kbd>/</kbd></dt><dd>Search</dd>
+          <dt><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></dt><dd>Move around a grid</dd>
+          <dt><kbd>Enter</kbd></dt><dd>Open</dd>
+          <dt><kbd>Home</kbd> <kbd>End</kbd></dt><dd>First / last card</dd>
+          <dt><kbd>p</kbd></dt><dd>Pin a maker</dd>
+          <dt><kbd>Esc</kbd></dt><dd>Close or clear</dd>
+          <dt><kbd>?</kbd></dt><dd>This menu</dd>
+        </dl>
+      </div>
+      <button
+        id="kb-help-btn"
+        aria-label="Keyboard shortcuts"
+        aria-expanded="false"
+        aria-controls="kb-help-panel"
+      >?</button>
+    </div>
+
     <script>
       import '../scripts/keyboard.js';
     </script>
@@ -76,5 +98,70 @@ const fullTitle = title ? `${title} · Keycap Archivist Mirror` : 'Keycap Archiv
   }
   main:focus {
     outline: none;
+  }
+
+  .kb-help {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 45;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+  #kb-help-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--bg-panel);
+    color: var(--ink-dim);
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: grid;
+    place-items: center;
+    transition: color var(--t), border-color var(--t);
+  }
+  #kb-help-btn:hover,
+  #kb-help-btn[aria-expanded='true'] {
+    color: var(--ink);
+    border-color: var(--line-strong);
+  }
+  .kb-help-panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    box-shadow: 0 12px 32px oklch(0.05 0 0 / 0.35);
+    padding: 12px 14px;
+    min-width: 220px;
+  }
+  .kb-help-title {
+    margin: 0 0 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink-mid);
+  }
+  .kb-help-panel dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 12px;
+    font-size: 0.75rem;
+    color: var(--ink-mid);
+  }
+  .kb-help-panel dt {
+    display: flex;
+    gap: 3px;
+    justify-content: flex-end;
+  }
+  .kb-help-panel dd {
+    margin: 0;
+    align-self: center;
+  }
+  @media (max-width: 700px), (hover: none) {
+    .kb-help {
+      display: none;
+    }
   }
 </style>
