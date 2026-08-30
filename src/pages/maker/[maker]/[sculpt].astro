@@ -250,6 +250,11 @@ const many = sculpt.colorways.length > 24;
       stemType: string | null;
     }
   >;
+  // Gallery path, captured before the lightbox ever rewrites the URL. While
+  // a colorway is open the address bar shows its share-page URL
+  // (…/<sculpt>/<id>/), so copying from the address bar — not just the Copy
+  // link button — produces a link that unfurls the right photo.
+  const galleryPath = location.pathname.replace(/\/+$/, '') + '/';
   const ids = Object.keys(data);
   const $ = (id: string) => document.getElementById(id)!;
   let current = '';
@@ -283,7 +288,7 @@ const many = sculpt.colorways.length > 24;
 
     // Preserve the router's history state; replacing it with null corrupts
     // Astro ClientRouter forward/back navigation.
-    history.replaceState(history.state, '', `#${id}`);
+    history.replaceState(history.state, '', `${galleryPath}${id}/`);
     if (!dialog.open) dialog.showModal();
 
     // warm the neighbors so prev/next feel instant
@@ -297,7 +302,7 @@ const many = sculpt.colorways.length > 24;
     if (dialog.open) dialog.close();
   }
   dialog.addEventListener('close', () => {
-    history.replaceState(history.state, '', location.pathname + location.search);
+    history.replaceState(history.state, '', galleryPath);
     // Deep-link and hashchange opens have no invoker for the browser to
     // restore focus to; send it back to the current colorway's card link.
     if (!document.activeElement || document.activeElement === document.body) {
@@ -334,7 +339,7 @@ const many = sculpt.colorways.length > 24;
   $('lb-copy').addEventListener('click', async () => {
     // Copy the per-colorway share page URL (correct og:image in previews),
     // not the #hash URL, whose fragment crawlers never see.
-    const shareUrl = `${location.origin}${location.pathname.replace(/\/+$/, '')}/${current}/`;
+    const shareUrl = `${location.origin}${galleryPath}${current}/`;
     const ok = await navigator.clipboard
       .writeText(shareUrl)
       .then(() => true)
