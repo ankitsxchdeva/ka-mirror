@@ -332,13 +332,16 @@ const many = sculpt.colorways.length > 24;
   $('lb-prev').addEventListener('click', () => step(-1));
   $('lb-next').addEventListener('click', () => step(1));
   $('lb-copy').addEventListener('click', async () => {
+    // Copy the per-colorway share page URL (correct og:image in previews),
+    // not the #hash URL, whose fragment crawlers never see.
+    const shareUrl = `${location.origin}${location.pathname.replace(/\/+$/, '')}/${current}/`;
     const ok = await navigator.clipboard
-      .writeText(location.href)
+      .writeText(shareUrl)
       .then(() => true)
       .catch(() => {
         // clipboard API can be unavailable (permissions, http); fall back
         const ta = document.createElement('textarea');
-        ta.value = location.href;
+        ta.value = shareUrl;
         document.body.appendChild(ta);
         ta.select();
         const done = document.execCommand('copy');
