@@ -4,3 +4,5 @@ data/
 .astro/
 .DS_Store
 .gstack/
+.env
+.playwright-mcp/

@@ -1,0 +1,19 @@
+{
+  "name": "ka-mirror-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "JSON API and Discord bot for the ka-mirror keycap catalog",
+  "scripts": {
+    "api": "node api.js",
+    "bot": "node bot.js",
+    "register": "node register.js",
+    "start": "node start.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.18.0"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}
