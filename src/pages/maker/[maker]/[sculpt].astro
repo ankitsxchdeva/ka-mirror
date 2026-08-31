@@ -90,13 +90,13 @@ const many = sculpt.colorways.length > 24;
       <h2 id="lb-name" aria-live="polite"></h2>
       <dl id="lb-meta"></dl>
       <div class="lb-actions">
-        <button id="lb-copy" class="text-link">Copy link</button>
+        <button id="lb-copy" class="quiet-action">Copy link</button>
         <a id="lb-full" class="text-link" target="_blank" rel="noopener">Full image</a>
       </div>
       <div class="lb-nav">
-        <button id="lb-prev" class="text-link" aria-label="Previous colorway">Prev</button>
-        <button id="lb-next" class="text-link" aria-label="Next colorway">Next</button>
-        <button id="lb-close" class="text-link" aria-label="Close">Close</button>
+        <button id="lb-prev" class="quiet-action" aria-label="Previous colorway">Prev</button>
+        <button id="lb-next" class="quiet-action" aria-label="Next colorway">Next</button>
+        <button id="lb-close" class="quiet-action" aria-label="Close">Close</button>
         <span class="lb-hint" aria-hidden="true"><kbd>←</kbd> <kbd>→</kbd> <kbd>esc</kbd></span>
       </div>
     </div>
@@ -113,9 +113,9 @@ const many = sculpt.colorways.length > 24;
   }
 
   dialog#lightbox {
-    border: 1px solid var(--line-strong);
+    border: 1px solid var(--line);
     border-radius: var(--radius-panel);
-    background: var(--bg-panel);
+    background: var(--bg); /* canonical popover: page-bg surface */
     color: var(--ink);
     padding: 0;
     width: min(920px, calc(100vw - 24px));
@@ -150,8 +150,8 @@ const many = sculpt.colorways.length > 24;
     gap: 6px;
   }
   .lb-side h2 {
-    font-size: 1.0625rem;
-    font-weight: 600;
+    font-size: 0.875rem; /* title tier */
+    font-weight: 700;
     line-height: 1.25;
     margin: 0;
   }
@@ -177,6 +177,18 @@ const many = sculpt.colorways.length > 24;
     gap: 14px;
     margin-top: 12px;
     font-size: 0.8125rem;
+  }
+  /* canonical quiet action: meta tier, muted; hover accent-hover; active accent */
+  .quiet-action {
+    font-size: 0.6875rem;
+    color: var(--ink-mid);
+    transition: color var(--t);
+  }
+  .quiet-action:hover {
+    color: var(--accent-hover);
+  }
+  .quiet-action:active {
+    color: var(--accent);
   }
   .lb-nav {
     margin-top: auto;

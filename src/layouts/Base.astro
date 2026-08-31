@@ -1,8 +1,6 @@
 ---
-import '@fontsource/ibm-plex-sans/400.css';
-import '@fontsource/ibm-plex-sans/500.css';
-import '@fontsource/ibm-plex-sans/600.css';
-import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/lato/400.css';
+import '@fontsource/lato/700.css';
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
 import Header from '../components/Header.astro';
@@ -18,7 +16,8 @@ const fullTitle = title ? `${title} · Keycap Archivist Mirror` : 'Keycap Archiv
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     {description && <meta name="description" content={description} />}
-    <meta name="theme-color" content="#1c1e24" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1e1c22" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f4fa" />
     <link rel="preconnect" href="https://cdn.keycap-archivist.com" />
     <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
@@ -41,8 +40,9 @@ const fullTitle = title ? `${title} · Keycap Archivist Mirror` : 'Keycap Archiv
           const light =
             stored === 'light' ||
             (!stored && window.matchMedia('(prefers-color-scheme: light)').matches);
-          if (light) document.documentElement.dataset.theme = 'light';
-          else delete document.documentElement.dataset.theme;
+          // explicit 'dark' so the no-JS prefers-color-scheme CSS fallback
+          // can't override a stored dark choice on light-system machines
+          document.documentElement.dataset.theme = light ? 'light' : 'dark';
         };
         apply();
         document.addEventListener('astro:after-swap', apply);
@@ -97,7 +97,7 @@ const fullTitle = title ? `${title} · Keycap Archivist Mirror` : 'Keycap Archiv
     background: var(--accent);
     color: var(--bg);
     font-size: 0.8125rem;
-    font-weight: 500;
+    font-weight: 700;
     padding: 6px 12px;
     border-radius: var(--radius-hairline);
     transform: translateY(-200%);
@@ -127,7 +127,7 @@ const fullTitle = title ? `${title} · Keycap Archivist Mirror` : 'Keycap Archiv
     background: var(--bg-panel);
     color: var(--ink-dim);
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: 400;
     display: grid;
     place-items: center;
     transition: color var(--t), border-color var(--t);
@@ -138,8 +138,8 @@ const fullTitle = title ? `${title} · Keycap Archivist Mirror` : 'Keycap Archiv
     border-color: var(--line-strong);
   }
   .kb-help-panel {
-    background: var(--bg-panel);
-    border: 1px solid var(--line-strong);
+    background: var(--bg); /* canonical popover: page-bg surface */
+    border: 1px solid var(--line);
     border-radius: var(--radius-panel);
     padding: 12px 14px;
     min-width: 220px;
@@ -147,7 +147,7 @@ const fullTitle = title ? `${title} · Keycap Archivist Mirror` : 'Keycap Archiv
   .kb-help-title {
     margin: 0 0 8px;
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--ink-mid);
   }
   .kb-help-panel dl {

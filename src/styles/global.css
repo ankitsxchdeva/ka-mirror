@@ -1,24 +1,30 @@
 /* ---------------------------------------------------------------------------
    Keycap Archivist Mirror. Modernized version of the original site: simple
-   card grids, photography first, no fluff. Cool graphite neutrals, one
-   vermilion accent for state, IBM Plex Sans, 8px card radius.
+   card grids, photography first, no fluff. Canonical identity per
+   ~/Documents/design (spec v0.5, lane: catalog): lavender-paper/night-plum
+   palette, Lato, one signal-indigo accent for state, coral editorial ink.
 --------------------------------------------------------------------------- */
 
 :root {
-  --bg: oklch(0.16 0.005 250);
-  --bg-panel: oklch(0.19 0.006 250);
-  --bg-hover: oklch(0.225 0.007 250);
-  --bg-inset: oklch(0.135 0.005 250);
-  --line: oklch(0.27 0.008 250);
-  --line-strong: oklch(0.4 0.01 250);
-  --ink: oklch(0.92 0.004 250);
-  --ink-mid: oklch(0.74 0.006 250);
-  --ink-dim: oklch(0.62 0.008 250);
-  --accent: oklch(0.64 0.17 30);
-  --overlay: oklch(0.1 0.005 250 / 0.8);
+  /* Core values track ~/Documents/design/tokens.css (dark theme). Derived
+   * surfaces (panel/hover/inset/line-strong/overlay) stay inside the
+   * canonical OKLCH family: hue ~290, low chroma (spec §2). */
+  --bg: #1e1c22; /* night plum */
+  --bg-panel: oklch(0.262 0.014 300);
+  --bg-hover: oklch(0.3 0.016 300);
+  --bg-inset: oklch(0.2 0.012 300);
+  --line: #413f54; /* aubergine: all 1px hairlines */
+  --line-strong: oklch(0.5 0.03 289);
+  --ink: #e8e4f4; /* pale lavender: primary text */
+  --ink-mid: #8e8aab; /* deep stone lilac: secondary text */
+  --ink-dim: color-mix(in srgb, var(--ink-mid) 75%, transparent);
+  --accent: #8b87c8; /* wisteria signal: interactivity/state only */
+  --accent-hover: #9db8dc; /* sky indigo: hover lift, focus outline */
+  --editorial: #de9180; /* pale coral: decorative marks only */
+  --overlay: oklch(0.14 0.012 300 / 0.8);
 
-  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --sans: 'Lato', Verdana, Helvetica, sans-serif;
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
   /* radius has jobs, not vibes (spec §2): */
   --radius-hairline: 2px; /* controls, badges, kbd, focus rings */
@@ -26,22 +32,45 @@
   --radius-card: 8px; /* media tiles and cards */
   --gutter: clamp(16px, 3vw, 32px);
   --t: 150ms cubic-bezier(0.25, 1, 0.5, 1);
+  --t-underline: 250ms ease;
   color-scheme: dark;
 }
 
 :root[data-theme='light'] {
-  --bg: oklch(0.965 0.005 250);
-  --bg-panel: oklch(0.99 0.004 250);
-  --bg-hover: oklch(0.925 0.006 250);
-  --bg-inset: oklch(0.93 0.006 250);
-  --line: oklch(0.87 0.008 250);
-  --line-strong: oklch(0.74 0.01 250);
-  --ink: oklch(0.24 0.005 250);
-  --ink-mid: oklch(0.42 0.006 250);
-  --ink-dim: oklch(0.5 0.006 250);
-  --accent: oklch(0.54 0.18 30);
-  --overlay: oklch(0.3 0.005 250 / 0.55);
+  --bg: #f5f4fa; /* lavender paper */
+  --bg-panel: oklch(0.988 0.006 294);
+  --bg-hover: oklch(0.935 0.01 294);
+  --bg-inset: oklch(0.945 0.01 294);
+  --line: #d8d6e8; /* mist: all 1px hairlines */
+  --line-strong: oklch(0.75 0.02 291);
+  --ink: #30292f; /* plum ink: primary text */
+  --ink-mid: #6a6884; /* stone lilac: secondary text */
+  --ink-dim: color-mix(in srgb, var(--ink-mid) 75%, transparent);
+  --accent: #355691; /* signal indigo: interactivity/state only */
+  --accent-hover: #5f5aa2; /* wisteria: hover lift, focus outline */
+  --editorial: #bf5a4a; /* coral ink: decorative marks only */
+  --overlay: oklch(0.3 0.012 294 / 0.55);
   color-scheme: light;
+}
+
+/* no-JS fallback: follow the system until a stored choice says otherwise */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --bg: #f5f4fa;
+    --bg-panel: oklch(0.988 0.006 294);
+    --bg-hover: oklch(0.935 0.01 294);
+    --bg-inset: oklch(0.945 0.01 294);
+    --line: #d8d6e8;
+    --line-strong: oklch(0.75 0.02 291);
+    --ink: #30292f;
+    --ink-mid: #6a6884;
+    --ink-dim: color-mix(in srgb, var(--ink-mid) 75%, transparent);
+    --accent: #355691;
+    --accent-hover: #5f5aa2;
+    --editorial: #bf5a4a;
+    --overlay: oklch(0.3 0.012 294 / 0.55);
+    color-scheme: light;
+  }
 }
 
 * {
@@ -96,7 +125,7 @@ input[type='text'] {
   font: inherit;
   font-size: 0.8125rem;
   color: var(--ink);
-  background: var(--bg-inset);
+  background: transparent; /* canonical search input: transparent, hairline */
   border: 1px solid var(--line);
   border-radius: var(--radius-hairline);
   padding: 6px 12px;
@@ -118,21 +147,17 @@ select {
   cursor: pointer;
 }
 
-select:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+select:focus-visible,
+input[type='search']:focus-visible,
+input[type='text']:focus-visible {
+  outline: 2px solid var(--accent-hover);
+  outline-offset: 3px;
 }
 
 input[type='search']:focus,
 input[type='text']:focus {
   outline: none;
   border-color: var(--accent);
-}
-
-input[type='search']:focus-visible,
-input[type='text']:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
 }
 
 /* 16px stops iOS from zooming the viewport when an input gains focus */
@@ -144,8 +169,8 @@ input[type='text']:focus-visible {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: 2px solid var(--accent-hover);
+  outline-offset: 3px;
   border-radius: var(--radius-hairline);
 }
 
@@ -157,9 +182,10 @@ input[type='text']:focus-visible {
 /* ---- text roles --------------------------------------------------------- */
 
 .page-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  line-height: 1.25;
+  font-size: 2rem; /* display tier: the one per page */
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
   margin: 0;
 }
 
@@ -184,20 +210,26 @@ input[type='text']:focus-visible {
 }
 
 .crumbs a:hover {
-  color: var(--accent);
+  color: var(--accent-hover);
 }
 
+/* the two-inks rule: separators are decorative marks, editorial ink */
+.crumbs span[aria-hidden='true'] {
+  color: var(--editorial);
+}
+
+/* canonical link: accent at rest, no underline; it grows on hover */
 a.text-link {
-  color: var(--ink-mid);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-color: var(--line-strong);
-  transition: color var(--t);
+  color: var(--accent);
+  text-decoration: none;
+  background: linear-gradient(currentColor, currentColor) no-repeat left bottom /
+    0% 1px;
+  transition: color var(--t), background-size var(--t-underline);
 }
 
 a.text-link:hover {
-  color: var(--accent);
-  text-decoration-color: var(--accent);
+  color: var(--accent-hover);
+  background-size: 100% 1px;
 }
 
 /* ---- card grids --------------------------------------------------------- */
@@ -248,7 +280,7 @@ a.text-link:hover {
 /* logo tiles: the published logo as-is (usually on white); dark mode dims
    the whole tile a touch so white grounds don't glare */
 .card-img.logo-tile {
-  background: oklch(0.97 0.004 250);
+  background: oklch(0.98 0.006 294); /* tinted white ground, canonical family */
   display: grid;
   place-items: center;
 }
@@ -269,8 +301,8 @@ a.text-link:hover {
 
 .card-name {
   display: block;
-  font-size: 0.8125rem;
-  font-weight: 500;
+  font-size: 0.875rem; /* title tier */
+  font-weight: 700;
   line-height: 1.25;
   overflow-wrap: anywhere;
 }
@@ -299,8 +331,8 @@ a.text-link:hover {
 
 /* keyboard focus rings the whole card, not the name link */
 .card:has(a:focus-visible) {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: 2px solid var(--accent-hover);
+  outline-offset: 3px;
 }
 
 .card a:focus-visible {
@@ -319,7 +351,7 @@ a.text-link:hover {
   height: 30px;
   display: grid;
   place-items: center;
-  font-size: 0.85rem;
+  font-size: 0.8125rem;
   color: var(--ink-dim);
   transition: color var(--t);
 }
@@ -350,20 +382,14 @@ a.text-link:hover {
 }
 
 .prose p {
-  line-height: 1.6;
+  line-height: 1.65;
   font-size: 0.9375rem;
 }
 
 .prose h2 {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   margin: 28px 0 8px;
-}
-
-.prose a {
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
 .prose code {

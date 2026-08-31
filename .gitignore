@@ -6,3 +6,4 @@ data/
 .gstack/
 .env
 .playwright-mcp/
+.playwright-cli/
