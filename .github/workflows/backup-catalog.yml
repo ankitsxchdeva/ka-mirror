@@ -1,0 +1,60 @@
+name: Catalog backup
+
+# Weekly snapshot of the compiled keycap-archivist catalog (the output of
+# upstream's Google-Docs scraper) into backup/. data/ is gitignored, so this
+# history is the only durable copy of the catalog that we own. See
+# backup/README.md for provenance and restore instructions.
+
+on:
+  schedule:
+    # Mondays 04:23 UTC: after upstream's daily sync finishes (~02:15) and
+    # this repo's own deploy (03:30). Odd minute to dodge cron congestion.
+    - cron: '23 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Never two backup runs at once.
+concurrency:
+  group: catalog-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # fetch-data.mjs uses node builtins only; no npm ci needed. It already
+      # validates the payload (array + minimum size) and falls back from
+      # GitHub raw to the upstream S3 CDN.
+      - name: Fetch latest catalog
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/fetch-data.mjs --force
+
+      - name: Commit snapshot if changed
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          # Compare data itself, not revision.json (its fetchedAt timestamp
+          # changes every fetch). No diff, no commit: git log on backup/ is
+          # the real change history of the catalog.
+          if [ -f backup/catalog.json ] && cmp -s backup/catalog.json data/catalog.json; then
+            echo "Catalog unchanged since last backup; nothing to do."
+            exit 0
+          fi
+          mkdir -p backup
+          cp data/catalog.json backup/catalog.json
+          cp data/revision.json backup/revision.json
+          revision=$(node -p "JSON.parse(require('fs').readFileSync('backup/revision.json','utf8')).revision.slice(0,8)")
+          git add backup/
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m "Catalog backup: upstream ${revision} [skip ci]"
+          git push
