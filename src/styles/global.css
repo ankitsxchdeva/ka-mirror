@@ -20,6 +20,7 @@
   --ink-dim: color-mix(in srgb, var(--ink-mid) 75%, transparent);
   --accent: #8b87c8; /* wisteria signal: interactivity/state only */
   --accent-hover: #9db8dc; /* sky indigo: hover lift, focus outline */
+  --star: oklch(0.64 0.17 30); /* vermilion: pinned star only (lane exception) */
   --editorial: #de9180; /* pale coral: decorative marks only */
   --overlay: oklch(0.14 0.012 300 / 0.8);
 
@@ -48,6 +49,7 @@
   --ink-dim: color-mix(in srgb, var(--ink-mid) 75%, transparent);
   --accent: #355691; /* signal indigo: interactivity/state only */
   --accent-hover: #5f5aa2; /* wisteria: hover lift, focus outline */
+  --star: oklch(0.54 0.18 30); /* vermilion: pinned star only (lane exception) */
   --editorial: #bf5a4a; /* coral ink: decorative marks only */
   --overlay: oklch(0.3 0.012 294 / 0.55);
   color-scheme: light;
@@ -67,6 +69,7 @@
     --ink-dim: color-mix(in srgb, var(--ink-mid) 75%, transparent);
     --accent: #355691;
     --accent-hover: #5f5aa2;
+    --star: oklch(0.54 0.18 30);
     --editorial: #bf5a4a;
     --overlay: oklch(0.3 0.012 294 / 0.55);
     color-scheme: light;
@@ -357,7 +360,7 @@ a.text-link:hover {
 }
 
 .pin[aria-pressed='true'] {
-  color: var(--accent);
+  color: var(--star);
 }
 
 /* ---- page header rows --------------------------------------------------- */

@@ -25,6 +25,9 @@ themes are the same canonical identity.
 - Inline filter input only on colorway galleries over 24 entries. Sort is a
   native `<select>`.
 - Deep-linkable everything: state in the URL, share links that resolve.
+- Lane exception to the One Accent Rule: the pinned star uses vermilion
+  (`--star`, the pre-spec accent) because indigo-on-dim is indistinguishable
+  on night plum. Star state only; focus and all other state stay indigo.
 
 Everything else (color mechanics, type tiers, motion, focus, components,
 copy) follows the spec; nothing project-specific overrides it.
