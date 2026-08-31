@@ -1,5 +1,8 @@
 # Design
 
+Lane: catalog — all design decisions follow ~/Documents/design/DESIGN.md;
+where this file and the spec disagree, the spec wins.
+
 Faithful modernization of the original Keycap Archivist layout. Super simple,
 zero fluff: no stats lines, no taglines, no decorative chrome, no extra
 panels. Header, grids, lightbox, footer. Nothing else.

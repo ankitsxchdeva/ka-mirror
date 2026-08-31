@@ -104,15 +104,15 @@ const links = [
     width: 56px;
     height: 56px;
     border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: oklch(0.97 0.002 90);
+    border-radius: var(--radius-card);
+    background: oklch(0.97 0.004 250);
     flex-shrink: 0;
     display: grid;
     place-items: center;
     overflow: hidden;
   }
   :global(:root:not([data-theme='light'])) .logo-box {
-    filter: brightness(0.75);
+    filter: brightness(0.85);
   }
   .logo-box :global(img) {
     width: 100%;

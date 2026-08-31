@@ -81,16 +81,14 @@ import { withBase } from '../lib/catalog.js';
   .mark {
     font-size: 0.6875rem;
     font-weight: 600;
-    letter-spacing: 0.03em;
     color: var(--bg);
     background: var(--ink);
     padding: 2px 5px;
-    border-radius: 5px;
+    border-radius: var(--radius-hairline);
   }
   .name {
     font-weight: 600;
     font-size: 0.875rem;
-    letter-spacing: -0.01em;
   }
   .tag {
     font-size: 0.6875rem;
@@ -105,7 +103,6 @@ import { withBase } from '../lib/catalog.js';
   .search input {
     width: 100%;
     padding-right: 34px;
-    border-radius: 999px;
   }
   .hint {
     position: absolute;
@@ -126,8 +123,7 @@ import { withBase } from '../lib/catalog.js';
     overflow-y: auto;
     background: var(--bg-panel);
     border: 1px solid var(--line-strong);
-    border-radius: var(--radius);
-    box-shadow: 0 12px 32px oklch(0.05 0 0 / 0.35);
+    border-radius: var(--radius-panel);
   }
   .icon-btn {
     color: var(--ink-dim);
@@ -162,10 +158,8 @@ import { withBase } from '../lib/catalog.js';
 
 <style is:global>
   .search-panel .sr-group {
-    font-size: 0.6875rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    font-size: 0.75rem;
+    font-weight: 500;
     color: var(--ink-dim);
     padding: 10px 12px 4px;
   }
@@ -192,7 +186,8 @@ import { withBase } from '../lib/catalog.js';
   }
   .search-panel .sr-note {
     padding: 12px;
-    font-size: 0.8125rem;
+    font-size: 0.6875rem;
+    font-style: italic;
     color: var(--ink-dim);
   }
 </style>

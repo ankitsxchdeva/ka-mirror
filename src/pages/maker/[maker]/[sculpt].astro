@@ -114,7 +114,7 @@ const many = sculpt.colorways.length > 24;
 
   dialog#lightbox {
     border: 1px solid var(--line-strong);
-    border-radius: var(--radius);
+    border-radius: var(--radius-panel);
     background: var(--bg-panel);
     color: var(--ink);
     padding: 0;
@@ -396,7 +396,7 @@ const many = sculpt.colorways.length > 24;
   function openFromHash() {
     const hash = location.hash.slice(1);
     if (hash && data[hash]) {
-      document.getElementById(hash)?.scrollIntoView({ block: 'center' });
+      document.getElementById(hash)?.scrollIntoView({ block: 'nearest' });
       show(hash);
     }
   }
