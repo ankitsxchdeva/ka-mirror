@@ -28,6 +28,8 @@ import { withBase } from '../lib/catalog.js';
       <div class="search-panel" id="ka-search-panel" role="listbox" hidden></div>
     </div>
 
+    <a class="nav-link" href={withBase('/wishlist/')}>Wishlist</a>
+
     <a
       class="icon-btn"
       href="https://github.com/ankitsxchdeva/ka-mirror"
@@ -125,6 +127,18 @@ import { withBase } from '../lib/catalog.js';
     border: 1px solid var(--line);
     border-radius: var(--radius-panel);
   }
+  .nav-link {
+    font-size: 0.8125rem;
+    color: var(--ink-dim);
+    white-space: nowrap;
+    transition: color var(--t);
+  }
+  .nav-link:hover {
+    color: var(--ink);
+  }
+  .nav-link[aria-current='page'] {
+    color: var(--ink);
+  }
   .icon-btn {
     color: var(--ink-dim);
     padding: 6px;
@@ -203,6 +217,19 @@ import { withBase } from '../lib/catalog.js';
     themeToggle.setAttribute('aria-pressed', String(light));
     localStorage.setItem('ka-theme', light ? 'light' : 'dark');
   });
+
+  // ---- wishlist nav link --------------------------------------------------
+  // The header persists across client-side navigations (transition:persist),
+  // so a server-rendered aria-current would go stale; recompute it instead.
+  const wlLink = document.querySelector('a.nav-link');
+  const syncWishlistLink = () => {
+    if (!wlLink) return;
+    const on = location.pathname.replace(/\/+$/, '').endsWith('/wishlist');
+    if (on) wlLink.setAttribute('aria-current', 'page');
+    else wlLink.removeAttribute('aria-current');
+  };
+  syncWishlistLink();
+  document.addEventListener('astro:page-load', syncWishlistLink);
 
   // ---- search -------------------------------------------------------------
   // Two lazily-fetched indexes: a light one (makers + sculpts, fetched on

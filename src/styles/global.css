@@ -363,6 +363,29 @@ a.text-link:hover {
   color: var(--star);
 }
 
+/* ---- quiet action ------------------------------------------------------- */
+
+/* canonical quiet action (spec §3): meta tier, muted; hover accent-hover;
+   active accent. Wishlist toggles, copy buttons, wishlist page tools. */
+.quiet-action {
+  font-size: 0.6875rem; /* meta tier */
+  color: var(--ink-mid);
+  transition: color var(--t);
+}
+
+.quiet-action:hover {
+  color: var(--accent-hover);
+}
+
+.quiet-action:active {
+  color: var(--accent);
+}
+
+/* a pressed toggle is state, so it reads in the accent */
+.quiet-action[aria-pressed='true'] {
+  color: var(--accent);
+}
+
 /* ---- page header rows --------------------------------------------------- */
 
 .head-row {

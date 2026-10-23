@@ -1,0 +1,387 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Wishlist"
+  description="Your saved artisan keycaps: caps you want, and caps you have for trade."
+>
+  <noscript>
+    <span class="noscript-note">
+      The wishlist needs JavaScript. Your saved caps stay readable in the catalog without it.
+    </span>
+  </noscript>
+
+  <div class="head-row">
+    <h1 class="page-title">Wishlist</h1>
+    <div class="toolbar">
+      <select id="wl-sort" aria-label="Sort saved caps">
+        <option value="grouped">Grouped by maker</option>
+        <option value="added">Recently added</option>
+        <option value="name">Name A-Z</option>
+      </select>
+      <button class="quiet-action" id="wl-copy">Copy list</button>
+      <button class="quiet-action" id="wl-export">Export</button>
+      <button class="quiet-action" id="wl-import">Import</button>
+      <input id="wl-file" type="file" accept="application/json" hidden />
+      <span id="wl-png-wrap" hidden><button class="quiet-action" id="wl-png">Download image</button></span>
+    </div>
+  </div>
+
+  <section class="wl-section" aria-labelledby="wl-want-h">
+    <div class="sec-head">
+      <h2 class="sub group-label" id="wl-want-h" tabindex="-1">Want <span class="wl-count" id="wl-count-want"></span></h2>
+      <button class="quiet-action" id="wl-clear-want" hidden>Clear</button>
+    </div>
+    <div class="grid wl-grid" id="wl-grid-want"></div>
+    <p class="empty" id="wl-empty-want" hidden>Nothing saved yet. Mark caps on any sculpt page with the heart button.</p>
+  </section>
+
+  <section class="wl-section" aria-labelledby="wl-have-h">
+    <div class="sec-head">
+      <h2 class="sub group-label" id="wl-have-h" tabindex="-1">For trade <span class="wl-count" id="wl-count-have"></span></h2>
+      <button class="quiet-action" id="wl-clear-have" hidden>Clear</button>
+    </div>
+    <div class="grid wl-grid" id="wl-grid-have"></div>
+    <p class="empty" id="wl-empty-have" hidden>Nothing saved yet. Mark caps on any sculpt page with the swap button.</p>
+  </section>
+</Base>
+
+<style>
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 14px;
+  }
+
+  /* .quiet-action lives in global.css (canonical recipe); failures render
+     in muted italic ink, never alarm red (spec) */
+  .quiet-action.wl-err {
+    font-style: italic;
+    color: var(--ink-dim);
+  }
+
+  .wl-section + .wl-section {
+    margin-top: 28px;
+  }
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .group-label {
+    font-weight: 400;
+    margin: 0;
+  }
+</style>
+
+<style is:global>
+  /* Cards are injected at runtime, so they carry no scoping attribute;
+     these rules stay pinned to this page's grids (.wl-grid). */
+  .wl-grid .cw-open {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .wl-grid .wl-remove {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.6875rem; /* meta tier */
+    color: var(--ink-mid);
+    transition: color var(--t);
+  }
+  .wl-grid .wl-remove:hover {
+    color: var(--accent-hover);
+  }
+  .wl-grid .wl-remove:active {
+    color: var(--accent);
+  }
+</style>
+
+<script>
+  // Wishlist page: renders the two saved-caps lists from the store, with
+  // sort, per-card remove, per-section clear, and sharing (copy text, JSON
+  // export/import, PNG image when the proxy is deployed). Re-runs on every
+  // client-side navigation (astro:page-load); all element refs are scoped
+  // inside init() against the current DOM.
+  import { LISTS, read, remove, clear, merge, subscribe } from '../scripts/wishlist.js';
+  import { PNG_EXPORT_AVAILABLE, downloadWishlistPng } from '../scripts/share-image.js';
+
+  const CDN = 'https://cdn.keycap-archivist.com/keycaps';
+  const BASE = import.meta.env.BASE_URL.replace(/\/+$/, '');
+  const SORT_KEY = 'ka-wishlist-sort';
+  const SORTS = ['grouped', 'added', 'name'];
+  const LIST_LABEL: Record<string, string> = { want: 'Want', have: 'For trade' };
+
+  interface Item {
+    id: string;
+    n: string;
+    m: string;
+    s: string;
+    u: string;
+    t: number;
+  }
+  type State = { want: Item[]; have: Item[] };
+
+  function esc(s: string): string {
+    return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+  }
+
+  function readSort(): string {
+    const s = localStorage.getItem(SORT_KEY) ?? 'grouped';
+    return SORTS.includes(s) ? s : 'grouped';
+  }
+
+  function sortItems(items: Item[]): Item[] {
+    const mode = readSort();
+    if (mode === 'added') return items; // stored array order
+    const name = (i: Item) => i.n || 'Unnamed';
+    const sorted = [...items];
+    if (mode === 'name') {
+      sorted.sort((a, b) => name(a).localeCompare(name(b), 'en'));
+    } else {
+      // grouped: same maker next to each other, same sculpt within a maker
+      sorted.sort(
+        (a, b) =>
+          a.m.localeCompare(b.m, 'en') ||
+          a.s.localeCompare(b.s, 'en') ||
+          name(a).localeCompare(name(b), 'en')
+      );
+    }
+    return sorted;
+  }
+
+  function cardHtml(list: string, item: Item): string {
+    const name = item.n || 'Unnamed';
+    const sub = [item.m, item.s].filter(Boolean).join(' / ');
+    return (
+      `<article class="card" data-id="${esc(item.id)}">` +
+      `<a class="cw-open" href="${BASE}${esc(item.u)}#${esc(item.id)}">` +
+      `<span class="card-img"><img src="${CDN}/250/${esc(item.id)}.jpg" alt="${esc(name)}" width="250" height="250" loading="lazy" decoding="async"></span>` +
+      `<span class="card-body">` +
+      `<span class="card-name">${esc(name)}</span>` +
+      `<span class="card-sub">${esc(sub)}</span>` +
+      `<button class="wl-remove" data-list="${list}" data-id="${esc(item.id)}" aria-label="Remove ${esc(name)}">Remove</button>` +
+      `</span></a></article>`
+    );
+  }
+
+  // Button feedback: the label flips in place for a moment, then restores
+  // (Name-the-Retry Rule). Failures render in muted italic ink via .wl-err.
+  function makeFlasher(btn: HTMLElement) {
+    const base = btn.textContent ?? '';
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    return (msg: string, ms = 1500, err = false) => {
+      clearTimeout(timer);
+      btn.textContent = msg;
+      btn.classList.toggle('wl-err', err);
+      timer = setTimeout(() => {
+        btn.textContent = base;
+        btn.classList.remove('wl-err');
+      }, ms);
+    };
+  }
+
+  function init() {
+    const sortSel = document.getElementById('wl-sort') as HTMLSelectElement | null;
+    const gridWant = document.getElementById('wl-grid-want');
+    const gridHave = document.getElementById('wl-grid-have');
+    if (!sortSel || !gridWant || !gridHave || gridWant.dataset.bound) return;
+    gridWant.dataset.bound = '1';
+
+    const grids = { want: gridWant, have: gridHave };
+    const counts = {
+      want: document.getElementById('wl-count-want')!,
+      have: document.getElementById('wl-count-have')!,
+    };
+    const empties = {
+      want: document.getElementById('wl-empty-want')!,
+      have: document.getElementById('wl-empty-have')!,
+    };
+    const clears = {
+      want: document.getElementById('wl-clear-want') as HTMLButtonElement,
+      have: document.getElementById('wl-clear-have') as HTMLButtonElement,
+    };
+    const headings = {
+      want: document.getElementById('wl-want-h')!,
+      have: document.getElementById('wl-have-h')!,
+    };
+    const pngWrap = document.getElementById('wl-png-wrap')!;
+    const pngBtn = document.getElementById('wl-png') as HTMLButtonElement;
+    const copyBtn = document.getElementById('wl-copy') as HTMLButtonElement;
+    const exportBtn = document.getElementById('wl-export') as HTMLButtonElement;
+    const importBtn = document.getElementById('wl-import') as HTMLButtonElement;
+    const fileInput = document.getElementById('wl-file') as HTMLInputElement;
+
+    function render(state: State = read()) {
+      for (const list of LISTS) {
+        const items = sortItems(state[list]);
+        grids[list].innerHTML = items.map((i) => cardHtml(list, i)).join('');
+        // A missing 250px thumb falls back to the original image, once.
+        grids[list].querySelectorAll<HTMLImageElement>('.card-img img').forEach((el) => {
+          el.addEventListener(
+            'error',
+            () => {
+              const id = el.closest('.card')?.dataset.id;
+              if (id) el.src = `${CDN}/${id}.jpg`;
+            },
+            { once: true }
+          );
+        });
+        counts[list].textContent = `· ${items.length}`;
+        empties[list].hidden = items.length > 0;
+        clears[list].hidden = items.length === 0;
+      }
+      // PNG export needs the image proxy and at least one saved cap.
+      pngWrap.hidden = !(PNG_EXPORT_AVAILABLE && state.want.length + state.have.length > 0);
+    }
+
+    // ---- sort ---------------------------------------------------------------
+    sortSel.value = readSort();
+    sortSel.addEventListener('change', () => {
+      localStorage.setItem(SORT_KEY, sortSel.value);
+      render(); // instant DOM rebuild, no animation (Instant Filtering Rule)
+    });
+
+    // ---- per-card remove (delegated) ---------------------------------------
+    for (const list of LISTS) {
+      grids[list].addEventListener('click', (e) => {
+        const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.wl-remove');
+        if (!btn) return;
+        e.preventDefault(); // the button sits inside the card's link
+        e.stopPropagation();
+        const id = btn.dataset.id!;
+        const card = btn.closest('.card') as HTMLElement;
+        const idx = [...grids[list].children].indexOf(card);
+        remove(list, id); // the store's subscribers re-render synchronously
+        // Focus lands on a neighbor card, or the section heading when the
+        // grid empties (No Dead Keys Rule).
+        const next =
+          (grids[list].children[idx] as HTMLElement | undefined) ??
+          (grids[list].children[idx - 1] as HTMLElement | undefined);
+        const link = next?.querySelector<HTMLAnchorElement>('a.cw-open');
+        if (link) link.focus({ preventScroll: true });
+        else headings[list].focus({ preventScroll: true });
+      });
+    }
+
+    // ---- per-section clear --------------------------------------------------
+    for (const list of LISTS) {
+      clears[list].addEventListener('click', () => {
+        const n = read()[list].length;
+        if (!n) return;
+        const caps = `${n} cap${n === 1 ? '' : 's'} will be removed.`;
+        if (!confirm(`Clear the ${LIST_LABEL[list]} list? ${caps}`)) return;
+        clear(list);
+        headings[list].focus({ preventScroll: true });
+      });
+    }
+
+    // ---- copy list (mechmarket-style text) ----------------------------------
+    const flashCopy = makeFlasher(copyBtn);
+    copyBtn.addEventListener('click', async () => {
+      const s = read();
+      const line = (arr: Item[]) =>
+        arr.map((i) => `${i.m} ${i.s} "${i.n || 'Unnamed'}"`).join(', ');
+      const lines: string[] = [];
+      if (s.want.length) lines.push('Want:', line(s.want));
+      if (s.have.length) {
+        if (lines.length) lines.push('');
+        lines.push('For trade:', line(s.have));
+      }
+      if (!lines.length) {
+        flashCopy('Nothing saved');
+        return;
+      }
+      const text = lines.join('\n');
+      const ok = await navigator.clipboard
+        .writeText(text)
+        .then(() => true)
+        .catch(() => {
+          // clipboard API can be unavailable (permissions, http); fall back
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          const done = document.execCommand('copy');
+          ta.remove();
+          return done;
+        });
+      flashCopy(ok ? 'Copied' : 'Copy failed');
+    });
+
+    // ---- export (JSON download) --------------------------------------------
+    const flashExport = makeFlasher(exportBtn);
+    exportBtn.addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(read(), null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'ka-wishlist.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      // Safari aborts the download if the object URL dies too early.
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      flashExport('Exported');
+    });
+
+    // ---- import (JSON upload, union merge) ----------------------------------
+    const flashImport = makeFlasher(importBtn);
+    importBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', async () => {
+      const file = fileInput.files?.[0];
+      fileInput.value = ''; // re-selecting the same file must fire change again
+      if (!file) return;
+      const fail = () => flashImport('Import failed: not a wishlist file', 2500, true);
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(await file.text());
+      } catch {
+        fail();
+        return;
+      }
+      const looksLikeState =
+        !!parsed &&
+        typeof parsed === 'object' &&
+        (Array.isArray((parsed as State).want) || Array.isArray((parsed as State).have));
+      if (!looksLikeState) {
+        fail();
+        return;
+      }
+      flashImport(`Imported ${merge(parsed as State)}`);
+    });
+
+    // ---- PNG image (only offered when the proxy is deployed) ----------------
+    const flashPng = makeFlasher(pngBtn);
+    pngBtn.addEventListener('click', async () => {
+      pngBtn.textContent = 'Rendering…';
+      pngBtn.setAttribute('aria-busy', 'true');
+      const s = read();
+      // The image matches the on-screen order (the selected sort).
+      const res = await downloadWishlistPng({ want: sortItems(s.want), have: sortItems(s.have) });
+      pngBtn.setAttribute('aria-busy', 'false');
+      flashPng(res === 'ok' ? 'Downloaded' : 'Image failed, try again');
+    });
+
+    // ---- live updates --------------------------------------------------------
+    // Same-tab writes and cross-tab storage events re-render both grids,
+    // preserving the selected sort. A dead page's listener unsubscribes
+    // itself once its DOM is gone.
+    const unsub = subscribe((state) => {
+      if (!gridWant.isConnected) {
+        unsub();
+        return;
+      }
+      render(state);
+    });
+
+    render();
+  }
+
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

@@ -5,6 +5,7 @@
  * - Arrow keys / Home / End move focus through card grids (column-aware,
  *   skipping cards hidden by a filter).
  * - "p" toggles the pin on the focused maker card.
+ * - "w" and "t" mark the focused colorway card as wanted / for trade.
  * - Escape clears the inline colorway filter.
  * - After a client-side navigation, focus moves to <main> so Tab continues
  *   into the new page's content.
@@ -81,6 +82,18 @@ document.addEventListener('keydown', (e) => {
       pin.click();
       active.focus();
       active.scrollIntoView({ block: 'nearest' });
+    }
+    return;
+  }
+
+  // "w" and "t" toggle the want / trade mark on the focused colorway card.
+  // No focus restore needed: marking never reorders the DOM, unlike pinning.
+  if ((e.key === 'w' || e.key === 't') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+    const list = e.key === 'w' ? 'want' : 'have';
+    const mark = active.closest('.card')?.querySelector(`.wl-mark[data-wl-list="${list}"]`);
+    if (mark instanceof HTMLElement) {
+      e.preventDefault();
+      mark.click();
     }
     return;
   }

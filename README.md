@@ -2,7 +2,7 @@
 
 [ka-mirror.com](https://ka-mirror.com): a static mirror of
 [Keycap Archivist](https://keycap-archivist.com), the community archive of
-artisan keycaps. Browsing only. No wishlist, no accounts, no servers.
+artisan keycaps. Browsing plus a wishlist that lives in your browser. No accounts, no servers.
 
 All catalog data comes from
 [keycap-archivist/database](https://github.com/keycap-archivist/database),
