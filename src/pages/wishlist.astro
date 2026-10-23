@@ -28,6 +28,12 @@ import Base from '../layouts/Base.astro';
     </div>
   </div>
 
+  <div class="wl-soc" id="wl-soc-wrap" hidden>
+    <span class="wl-soc-label">Image footer:</span>
+    <input id="wl-soc-discord" type="text" placeholder="Discord handle" maxlength="32" aria-label="Discord handle shown on the image" />
+    <input id="wl-soc-instagram" type="text" placeholder="Instagram handle" maxlength="32" aria-label="Instagram handle shown on the image" />
+  </div>
+
   <section class="wl-section" aria-labelledby="wl-want-h">
     <div class="sec-head">
       <h2 class="sub group-label" id="wl-want-h" tabindex="-1">Want <span class="wl-count" id="wl-count-want"></span></h2>
@@ -60,6 +66,21 @@ import Base from '../layouts/Base.astro';
   .quiet-action.wl-err {
     font-style: italic;
     color: var(--ink-dim);
+  }
+
+  .wl-soc {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 10px;
+    margin: -4px 0 16px;
+  }
+  .wl-soc-label {
+    font-size: 0.75rem;
+    color: var(--ink-dim);
+  }
+  .wl-soc input {
+    width: 170px;
   }
 
   .wl-section + .wl-section {
@@ -113,6 +134,7 @@ import Base from '../layouts/Base.astro';
   const CDN = 'https://cdn.keycap-archivist.com/keycaps';
   const BASE = import.meta.env.BASE_URL.replace(/\/+$/, '');
   const SORT_KEY = 'ka-wishlist-sort';
+  const SOC_KEY = 'ka-wishlist-socials';
   const SORTS = ['grouped', 'added', 'name'];
   const LIST_LABEL: Record<string, string> = { want: 'Want', have: 'For trade' };
 
@@ -133,6 +155,19 @@ import Base from '../layouts/Base.astro';
   function readSort(): string {
     const s = localStorage.getItem(SORT_KEY) ?? 'grouped';
     return SORTS.includes(s) ? s : 'grouped';
+  }
+
+  // Socials for the image footer, validated on read like every stored value.
+  function readSocials(): { discord: string; instagram: string } {
+    try {
+      const j = JSON.parse(localStorage.getItem(SOC_KEY) ?? '{}');
+      return {
+        discord: typeof j.discord === 'string' ? j.discord : '',
+        instagram: typeof j.instagram === 'string' ? j.instagram : '',
+      };
+    } catch {
+      return { discord: '', instagram: '' };
+    }
   }
 
   function sortItems(items: Item[]): Item[] {
@@ -356,13 +391,38 @@ import Base from '../layouts/Base.astro';
     });
 
     // ---- PNG image (only offered when the proxy is deployed) ----------------
+    // The socials inputs only feed the image, so they share the gate.
+    const socWrap = document.getElementById('wl-soc-wrap')!;
+    socWrap.hidden = !PNG_EXPORT_AVAILABLE;
+    const socInputs = {
+      discord: document.getElementById('wl-soc-discord') as HTMLInputElement,
+      instagram: document.getElementById('wl-soc-instagram') as HTMLInputElement,
+    };
+    const saved = readSocials();
+    socInputs.discord.value = saved.discord;
+    socInputs.instagram.value = saved.instagram;
+    for (const key of ['discord', 'instagram'] as const) {
+      socInputs[key].addEventListener('input', () => {
+        localStorage.setItem(
+          SOC_KEY,
+          JSON.stringify({
+            discord: socInputs.discord.value,
+            instagram: socInputs.instagram.value,
+          })
+        );
+      });
+    }
+
     const flashPng = makeFlasher(pngBtn);
     pngBtn.addEventListener('click', async () => {
       pngBtn.textContent = 'Rendering…';
       pngBtn.setAttribute('aria-busy', 'true');
       const s = read();
       // The image matches the on-screen order (the selected sort).
-      const res = await downloadWishlistPng({ want: sortItems(s.want), have: sortItems(s.have) });
+      const res = await downloadWishlistPng(
+        { want: sortItems(s.want), have: sortItems(s.have) },
+        readSocials()
+      );
       pngBtn.setAttribute('aria-busy', 'false');
       flashPng(res === 'ok' ? 'Downloaded' : 'Image failed, try again');
     });
